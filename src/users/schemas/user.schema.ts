@@ -2,6 +2,7 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import * as mongoose from 'mongoose';
 import { Document } from 'mongoose';
 import { Base, Status } from 'src/common/schemas/base.schema';
+import { Company } from 'src/companies/schemas/company.schema';
 
 export type UserDocument = User & Document;
 
@@ -58,6 +59,12 @@ export class User extends Base {
 
   @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'User' })
   updatedBy: User;
+
+  @Prop({
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Company',
+  })
+  company: Company;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);
