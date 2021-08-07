@@ -1,4 +1,4 @@
-import { Prop, Schema } from '@nestjs/mongoose';
+import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import * as mongoose from 'mongoose';
 import { Branch } from 'src/branches/schemas/branch.schema';
 import { User } from 'src/users/schemas/user.schema';
@@ -37,3 +37,5 @@ export class Report {
   @Prop()
   createdOn: Date;
 }
+
+export const ReportSchema = SchemaFactory.createForClass(Report);

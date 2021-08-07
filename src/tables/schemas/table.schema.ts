@@ -19,18 +19,6 @@ export class Table extends Base {
     ref: 'Branch',
   })
   branch: Branch;
-
-  @Prop({
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
-  })
-  createdBy: User;
-
-  @Prop({
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
-  })
-  updatedBy: User;
 }
 
 export const TableSchema = SchemaFactory.createForClass(Table);

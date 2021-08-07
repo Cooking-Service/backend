@@ -12,18 +12,6 @@ export class EmployeeType extends Base {
     unique: true,
   })
   type: string;
-
-  @Prop({
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
-  })
-  createdBy: User;
-
-  @Prop({
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
-  })
-  updatedBy: User;
 }
 
 export const EmployeeTypeSchema = SchemaFactory.createForClass(EmployeeType);

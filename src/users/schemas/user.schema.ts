@@ -54,12 +54,6 @@ export class User extends Base {
   @Prop({ type: String, default: Status.INACTIVE })
   status: string;
 
-  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'User' })
-  createdBy: User;
-
-  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'User' })
-  updatedBy: User;
-
   @Prop({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Company',

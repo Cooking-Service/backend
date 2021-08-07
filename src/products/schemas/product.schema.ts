@@ -1,4 +1,4 @@
-import { Prop, Schema } from '@nestjs/mongoose';
+import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import * as mongoose from 'mongoose';
 import { Base } from 'src/common/schemas/base.schema';
 import { Company } from 'src/companies/schemas/company.schema';
@@ -33,3 +33,5 @@ export class Product extends Base {
   })
   company: Company;
 }
+
+export const ProductSchema = SchemaFactory.createForClass(Product);

@@ -23,18 +23,6 @@ export class Branch extends Base {
     ref: 'Company',
   })
   company: Company;
-
-  @Prop({
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
-  })
-  createdBy: User;
-
-  @Prop({
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
-  })
-  updatedBy: User;
 }
 
 export const BranchSchema = SchemaFactory.createForClass(Branch);

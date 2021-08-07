@@ -15,18 +15,6 @@ export class Company extends Base {
 
   @Prop()
   logo: string;
-
-  @Prop({
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
-  })
-  createdBy: User;
-
-  @Prop({
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
-  })
-  updatedBy: User;
 }
 
 export const CompanySchema = SchemaFactory.createForClass(Company);
