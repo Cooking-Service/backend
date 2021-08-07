@@ -9,6 +9,8 @@ export class LocalStrategy extends PassportStrategy(Strategy) {
     super();
   }
 
+  // validate asks to validate user if user exist.
+  // if user exist, the user is sended to login on app.controller how request arg.
   async validate(username: string, password: string): Promise<any> {
     const user = await this.authService.validateUser(username, password);
     if (!user) {

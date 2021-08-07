@@ -9,6 +9,7 @@ export class AuthService {
     private jwtService: JwtService,
   ) {}
 
+  // if user exist, user is sended to validate() on local.startegy
   async validateUser(username: string, pass: string): Promise<any> {
     const user = await this.usersService.findByUsername(username);
     if (user && user.password === pass) {
@@ -17,6 +18,7 @@ export class AuthService {
     return null;
   }
 
+  // user comes from request on app.cpntroller, here is generated the JWT
   async login(user: any): Promise<ResponseDto<any>> {
     const payload = { username: user.username, sub: user._id };
     return {

@@ -7,6 +7,8 @@ import { SkipAuth } from './auth/skip-auth.decorator';
 export class AppController {
   constructor(private authService: AuthService) {}
 
+  // LocalGuard takes credentials of body request
+  // once user is validated login takes user and create the token on auth.service. 
   @UseGuards(LocalAuthGuard)
   @Post('auth/login')
   @SkipAuth()

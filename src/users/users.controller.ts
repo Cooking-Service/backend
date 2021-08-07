@@ -1,12 +1,11 @@
 import {
   Body,
-  Controller,
-  Get,
-  Post,
+  Controller, Post,
   UsePipes,
   ValidationPipe
 } from '@nestjs/common';
 import { Roles } from 'src/auth/roles.decorator';
+import { CurrentUser } from 'src/auth/user.guard';
 import { RegisterUserDto } from './dto/users.dto';
 import { User, UserRoles } from './schemas/user.schema';
 import { UsersService } from './users.service';
@@ -15,21 +14,18 @@ import { UsersService } from './users.service';
 export class UsersController {
   constructor(private service: UsersService) {}
 
-  @Get()
-  @Roles(UserRoles.ADMIN)
-  async getUsers() {
-    return 'hola';
-  }
-
   @Post()
   @UsePipes(
     new ValidationPipe({
       forbidNonWhitelisted: true,
     }),
   )
+  @Roles(UserRoles.SUPER_ADMIN, UserRoles.ADMIN)
   async registerUser(
     @Body() registerUserDto: RegisterUserDto,
+    @CurrentUser() currentUser: CurrentUserDto,
   ): Promise<ResponseDto<User>> {
-    return await this.service.create(registerUserDto);
+    console.log(currentUser);
+    return;
   }
 }
