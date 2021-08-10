@@ -1,18 +1,34 @@
-import { Controller, Post, Request, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Request, UseGuards } from '@nestjs/common';
 import { AuthService } from './auth/auth.service';
 import { LocalAuthGuard } from './auth/local-auth.guard';
 import { SkipAuth } from './auth/skip-auth.decorator';
+import { EmailTemplate } from './common/mailer/node.mailer';
+import { sendEmails } from './common/mailer/node.mailer';
 
 @Controller()
 export class AppController {
   constructor(private authService: AuthService) {}
 
   // LocalGuard takes credentials of body request
-  // once user is validated login takes user and create the token on auth.service. 
+  // once user is validated login takes user and create the token on auth.service.
   @UseGuards(LocalAuthGuard)
   @Post('auth/login')
   @SkipAuth()
   async login(@Request() req) {
     return this.authService.login(req.user);
+  }
+
+  @Get('test-email')
+  @SkipAuth()
+  async email() {
+    return await sendEmails({
+      to: 'ivanchav112@gmail.com',
+      subject: 'Test',
+      payload: {
+        name: 'Ivancho',
+        link: 'google.com',
+      },
+      template: EmailTemplate.ACTIVE_ACCOUNT,
+    });
   }
 }
