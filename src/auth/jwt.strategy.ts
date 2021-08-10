@@ -19,8 +19,9 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     });
   }
 
-  async validate(payload: any): Promise<CurrentUserDto> {
-    const roles = await this.usersService.getUserRoles(payload.sub);
-    return { userId: payload.sub, username: payload.username, roles };
+  async validate(payload: any): Promise<User> {
+    //const roles = await this.usersService.getUserRoles(payload.sub);
+    const user = await this.usersService.findByUsername(payload.username);
+    return user;
   }
 }
