@@ -39,6 +39,20 @@ export class UsersService {
     return user.roles;
   }
 
+  async getProfile(username: string): Promise<ResponseDto<User>> {
+    const user = await this.userModel
+      .findOne({ username })
+      .select('-createdOn -createdBy -updatedOn -updatedBy -status')
+      .populate({
+        path: 'company',
+        select: '-createdOn -createdBy -updatedOn -updatedBy',
+      });
+    return {
+      success: true,
+      response: user,
+    };
+  }
+
   async create(
     registerUserDto: RegisterUserDto,
     createdBy: User,
@@ -128,7 +142,7 @@ export class UsersService {
         throw new Error('send email');
       }
 
-      // confirm all trnasactions of mongoose. 
+      // confirm all trnasactions of mongoose.
       await session.commitTransaction();
 
       return {

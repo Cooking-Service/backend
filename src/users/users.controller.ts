@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Get,
   Post,
   UsePipes,
   ValidationPipe,
@@ -16,6 +17,11 @@ import { UsersService } from './users.service';
 export class UsersController {
   constructor(private service: UsersService) {}
 
+  @Get('profile')
+  async profile(@CurrentUser() currentUser: User): Promise<ResponseDto<User>> {
+    return await this.service.getProfile(currentUser.username);
+  }
+
   @Post()
   @UsePipes(
     new ValidationPipe({
@@ -23,7 +29,7 @@ export class UsersController {
     }),
   )
   @Roles(UserRoles.SUPER_ADMIN, UserRoles.ADMIN)
-  async registerUser(
+  async register(
     @Body() registerUserDto: RegisterUserDto,
     @CurrentUser() currentUser: User,
   ): Promise<ResponseDto<User>> {
