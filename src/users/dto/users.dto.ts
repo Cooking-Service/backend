@@ -1,4 +1,11 @@
-import { IsEmail, IsEnum, IsOptional, IsString } from 'class-validator';
+import {
+  IsEmail,
+  IsEnum,
+  IsMongoId,
+  IsOptional,
+  IsString,
+} from 'class-validator';
+import * as mongoose from 'mongoose';
 import { UserRoles } from '../schemas/user.schema';
 
 export class RegisterUserDto {
@@ -14,4 +21,8 @@ export class RegisterUserDto {
   @IsOptional()
   @IsEnum(UserRoles, { each: true })
   roles: UserRoles[];
+
+  @IsOptional()
+  @IsMongoId()
+  company: mongoose.Schema.Types.ObjectId;
 }
