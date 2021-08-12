@@ -1,7 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import * as mongoose from 'mongoose';
 import { Document } from 'mongoose';
-import { Base, Status } from 'src/common/schemas/base.schema';
 import { Company } from 'src/companies/schemas/company.schema';
 
 export type UserDocument = User & Document;
@@ -13,52 +12,92 @@ export enum UserRoles {
   EMPLOYEE = 'EMPLOYEE',
 }
 
-/**
- * To create an avatar for user, is necesary to concat 'name+lastName'.
- */
-export const avatarURL =
-  'https://ui-avatars.com/api/?format=svg&background=random&name=';
+export enum UserStatus {
+  PENDINDG = 'PENDING',
+  ACTIVE = 'ACTIVE',
+  INACTIVE = 'INACTIVE',
+  DELETED = 'DELETED',
+}
 
-@Schema()
-export class User extends Base {
+@Schema({ versionKey: false })
+export class User {
   @Prop({
     required: true,
   })
   name: string;
 
-  @Prop()
+  @Prop({
+    required: true,
+  })
   lastName: string;
 
   @Prop({
+    required: true,
     unique: true,
   })
   username: string;
 
   @Prop({
+    required: true,
     unique: true,
   })
   email: string;
 
-  @Prop()
+  @Prop({
+    select: false,
+    default: null,
+  })
   password: string;
 
-  @Prop()
+  @Prop({
+    default: null,
+  })
   avatar: string;
 
   @Prop({
     type: [String],
     enum: UserRoles,
+    default: null,
   })
   roles: string[];
 
-  @Prop({ type: String, default: Status.INACTIVE })
+  @Prop({
+    type: String,
+    enum: UserStatus,
+    default: UserStatus.PENDINDG,
+  })
   status: string;
 
   @Prop({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Company',
+    default: null,
   })
   company: Company;
+
+  @Prop({
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    default: null,
+  })
+  createdBy: User;
+
+  @Prop({
+    default: null,
+  })
+  createdOn: Date;
+
+  @Prop({
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    default: null,
+  })
+  updatedBy: User;
+
+  @Prop({
+    default: null,
+  })
+  updatedOn: Date;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

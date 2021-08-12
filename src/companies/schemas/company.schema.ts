@@ -1,19 +1,28 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import * as mongoose from 'mongoose';
 import { Document } from 'mongoose';
 import { Base } from 'src/common/schemas/base.schema';
-import { User } from 'src/users/schemas/user.schema';
 
 export type CompanyDocument = Company & Document;
 
-@Schema()
+@Schema({
+  versionKey: false,
+})
 export class Company extends Base {
   @Prop({
+    required: true,
     unique: true,
   })
   name: string;
 
-  @Prop()
+  @Prop({
+    required: true,
+    unique: true,
+  })
+  code: string;
+
+  @Prop({
+    default: null,
+  })
   logo: string;
 }
 
