@@ -9,7 +9,7 @@ export enum EmailTemplate {
   ACTIVE_ACCOUNT = 'active-account',
 }
 
-export const sendEmails = async (data: EmailDto) => {
+export const sendEmail = async (data: EmailDto) => {
   const from = process.env.FROM_EMAIL;
   const pass = process.env.PASS_EMAIL;
 
@@ -49,14 +49,12 @@ export const sendEmails = async (data: EmailDto) => {
   return await transporter
     .sendMail(mailOptions)
     .then((res) => {
-      console.log(res);
       return {
         success: true,
         response: res,
       };
     })
     .catch((err) => {
-      console.log(err);
       return {
         success: false,
         error: err,

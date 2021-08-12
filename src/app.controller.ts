@@ -3,7 +3,7 @@ import { AuthService } from './auth/auth.service';
 import { LocalAuthGuard } from './auth/local-auth.guard';
 import { SkipAuth } from './auth/skip-auth.decorator';
 import { EmailTemplate } from './common/mailer/node.mailer';
-import { sendEmails } from './common/mailer/node.mailer';
+import { sendEmail } from './common/mailer/node.mailer';
 
 @Controller()
 export class AppController {
@@ -21,7 +21,7 @@ export class AppController {
   @Get('test-email')
   @SkipAuth()
   async email() {
-    return await sendEmails({
+    return await sendEmail({
       to: 'ivanchav112@gmail.com',
       subject: 'Test',
       payload: {
