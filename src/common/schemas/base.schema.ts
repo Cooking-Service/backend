@@ -13,24 +13,31 @@ export class Base {
   @Prop({
     type: String,
     enum: Status,
+    default: null,
   })
   status: string;
 
   @Prop({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
+    default: null,
   })
   createdBy: User;
 
-  @Prop()
+  @Prop({
+    default: null,
+  })
   createdOn: Date;
 
   @Prop({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
+    default: null,
   })
   updatedBy: User;
 
-  @Prop()
+  @Prop({
+    default: null,
+  })
   updatedOn: Date;
 }
