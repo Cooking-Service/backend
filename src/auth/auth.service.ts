@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { ResponseDto } from 'src/common/dto/response.dto';
+import * as bcrypt from 'bcrypt';
+import { UserStatus } from 'src/users/schemas/user.schema';
 import { UsersService } from '../users/users.service';
 
 @Injectable()
@@ -13,20 +14,22 @@ export class AuthService {
   // if user exist, user is sended to validate() on local.startegy
   async validateUser(username: string, pass: string): Promise<any> {
     const user = await this.usersService.findByUsername(username);
-    if (user && user.password === pass) {
-      return user;
+
+    if (user && user.status === UserStatus.ACTIVE) {
+      const match = await bcrypt.compare(pass, user.password);
+      if (match) {
+        return user;
+      }
     }
+
     return null;
   }
 
   // user comes from request on app.cpntroller, here is generated the JWT
-  async login(user: any): Promise<ResponseDto<any>> {
+  async login(user: any) {
     const payload = { username: user.username, sub: user._id };
     return {
-      success: true,
-      response: {
-        token: this.jwtService.sign(payload),
-      },
+      token: this.jwtService.sign(payload),
     };
   }
 

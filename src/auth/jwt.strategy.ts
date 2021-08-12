@@ -1,10 +1,11 @@
-import { ExtractJwt, Strategy } from 'passport-jwt';
-import { PassportStrategy } from '@nestjs/passport';
-import { Injectable } from '@nestjs/common';
+import {
+  ForbiddenException, Injectable
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { PassportStrategy } from '@nestjs/passport';
+import { ExtractJwt, Strategy } from 'passport-jwt';
+import { User, UserStatus } from 'src/users/schemas/user.schema';
 import { UsersService } from 'src/users/users.service';
-import { User } from 'src/users/schemas/user.schema';
-import { CurrentUserDto } from 'src/common/dto/current-user.dto';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
@@ -20,8 +21,10 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   }
 
   async validate(payload: any): Promise<User> {
-    //const roles = await this.usersService.getUserRoles(payload.sub);
     const user = await this.usersService.findByUsername(payload.username);
-    return user;
+    if (user && user.status === UserStatus.ACTIVE) {
+      return user;
+    }
+    throw new ForbiddenException();
   }
 }
