@@ -42,7 +42,7 @@ export class UsersService {
   async create(
     registerUserDto: RegisterUserDto,
     createdBy: User,
-  ): Promise<ResponseDto<any | null>> {
+  ): Promise<ResponseDto<User>> {
     // session will help us to manage transaccions
     const session = await this.connection.startSession();
 

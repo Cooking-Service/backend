@@ -3,7 +3,7 @@ import {
   IsEnum,
   IsMongoId,
   IsOptional,
-  IsString,
+  IsString
 } from 'class-validator';
 import * as mongoose from 'mongoose';
 import { UserRoles } from '../schemas/user.schema';
@@ -18,7 +18,6 @@ export class RegisterUserDto {
   @IsEmail()
   readonly email: string;
 
-  @IsOptional()
   @IsEnum(UserRoles, { each: true })
   roles: UserRoles[];
 
