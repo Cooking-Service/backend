@@ -24,7 +24,7 @@ export class User {
   @Prop({
     required: true,
   })
-  name: string;
+  firstName: string;
 
   @Prop({
     required: true,
@@ -98,6 +98,11 @@ export class User {
     default: null,
   })
   updatedOn: Date;
+
+  @Prop({
+    default: null,
+  })
+  lastLogin: Date;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

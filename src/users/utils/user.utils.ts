@@ -1,6 +1,6 @@
 export const generateUsername = (
   companyCode: string,
-  name: string,
+  firstName: string,
   lastName: string,
 ): string => {
   const pattern = /[^aeiou\W\d]/g;
@@ -15,9 +15,9 @@ export const generateUsername = (
 
     x += lastName.charAt(lastName.length - 1);
 
-    return `${name.charAt(0)}${x}${random}@${companyCode}`;
+    return `${firstName.charAt(0)}${x}${random}@${companyCode}`;
   }
 
   const [a, b, c] = characters;
-  return `${name.charAt(0)}${a}${b}${c}${random}@${companyCode}`.toLowerCase();
+  return `${firstName.charAt(0)}${a}${b}${c}${random}@${companyCode}`.toLowerCase();
 };
