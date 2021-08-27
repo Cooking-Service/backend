@@ -4,6 +4,7 @@ import {
   Get,
   NotFoundException,
   Param,
+  Patch,
   Post,
   Put,
   Query,
@@ -15,6 +16,7 @@ import { CurrentUser } from 'src/auth/user.guard';
 import { ResponseDto } from 'src/common/dto/response.dto';
 import {
   GroupsValidation,
+  ModifyPasswordDto,
   ModifyUserDto,
   RegisterUserDto,
   UserFiltersDto,
@@ -145,5 +147,18 @@ export class UsersController {
     }
     delete modifyUserDto.company;
     return await this.service.modify(id, modifyUserDto, currentUser);
+  }
+
+  @Patch('password-change')
+  @UsePipes(
+    new ValidationPipe({
+      forbidNonWhitelisted: true,
+    }),
+  )
+  async changePassword(
+    @Body() passwordsDto: ModifyPasswordDto,
+    @CurrentUser() currentUser: User,
+  ): Promise<ResponseDto<any>> {
+    return await this.service.changePassword(currentUser['_id'], passwordsDto);
   }
 }

@@ -4,6 +4,7 @@ import {
   IsMongoId,
   IsOptional,
   IsString,
+  MinLength,
 } from 'class-validator';
 import * as mongoose from 'mongoose';
 import { UserRoles, UserStatus } from '../schemas/user.schema';
@@ -72,4 +73,12 @@ export class ModifyUserDto {
 
   @IsMongoId({ groups: [GroupsValidation.SUPER_ADMIN] })
   company: mongoose.Schema.Types.ObjectId;
+}
+
+export class ModifyPasswordDto {
+  @IsString()
+  readonly currentPassword: string;
+
+  @MinLength(8)
+  readonly newPassword: string;
 }

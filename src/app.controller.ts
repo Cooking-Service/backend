@@ -1,9 +1,15 @@
-import { Controller, Get, Post, Request, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  HttpCode,
+  Post,
+  Request,
+  UseGuards,
+} from '@nestjs/common';
 import { AuthService } from './auth/auth.service';
 import { LocalAuthGuard } from './auth/local-auth.guard';
 import { SkipAuth } from './auth/skip-auth.decorator';
-import { EmailTemplate } from './common/mailer/node.mailer';
-import { sendEmail } from './common/mailer/node.mailer';
+import { EmailTemplate, sendEmail } from './common/mailer/node.mailer';
 
 @Controller()
 export class AppController {
@@ -13,6 +19,7 @@ export class AppController {
   // once user is validated login takes user and create the token on auth.service.
   @UseGuards(LocalAuthGuard)
   @Post('auth/login')
+  @HttpCode(200)
   @SkipAuth()
   async login(@Request() req) {
     return this.authService.login(req.user);

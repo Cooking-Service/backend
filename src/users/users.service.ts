@@ -1,26 +1,28 @@
 import {
   Injectable,
   InternalServerErrorException,
-  NotFoundException,
+  NotFoundException
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { InjectConnection, InjectModel } from '@nestjs/mongoose';
+import * as bcrypt from 'bcrypt';
 import * as mongoose from 'mongoose';
 import { Model } from 'mongoose';
 import { ResponseDto } from 'src/common/dto/response.dto';
 import { EmailTemplate, sendEmail } from 'src/common/mailer/node.mailer';
 import { CompaniesService } from 'src/companies/companies.service';
 import {
+  ModifyPasswordDto,
   ModifyUserDto,
   RegisterUserDto,
-  UserFiltersDto,
+  UserFiltersDto
 } from './dto/users.dto';
 import { HashType } from './schemas/user-hash.schema';
 import {
   User,
   UserDocument,
   UserRoles,
-  UserStatus,
+  UserStatus
 } from './schemas/user.schema';
 import { UsersHashesService } from './users-hashes.service';
 import { generateUsername } from './utils/user.utils';
@@ -414,6 +416,52 @@ export class UsersService {
         throw error;
       }
 
+      throw new InternalServerErrorException();
+    } finally {
+      session.endSession();
+    }
+  }
+
+  async changePassword(
+    id: string,
+    { currentPassword, newPassword }: ModifyPasswordDto,
+  ): Promise<ResponseDto<any>> {
+    const session = await this.connection.startSession();
+
+    session.startTransaction();
+
+    try {
+      const user = await this.userModel
+        .findById(id)
+        .select({
+          password: 1,
+        })
+        .session(session);
+
+      const match = await bcrypt.compare(currentPassword, user.password);
+
+      if (!match) {
+        await session.abortTransaction();
+        return {
+          success: false,
+          message: 'Passwords Not Match.',
+        };
+      }
+
+      const newPasswordHashed = bcrypt.hashSync(newPassword, 10);
+
+      user.password = newPasswordHashed;
+
+      await user.save({ session });
+
+      await session.commitTransaction();
+
+      return {
+        success: true,
+        message: 'Password Successfully Changed.',
+      };
+    } catch (error) {
+      await session.abortTransaction();
       throw new InternalServerErrorException();
     } finally {
       session.endSession();
