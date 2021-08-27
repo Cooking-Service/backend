@@ -6,7 +6,14 @@ import {
   IsString,
 } from 'class-validator';
 import * as mongoose from 'mongoose';
-import { UserRoles } from '../schemas/user.schema';
+import { UserRoles, UserStatus } from '../schemas/user.schema';
+
+export enum GroupsValidation {
+  PROFILE = 'PROFILE',
+  SUPER_ADMIN = 'SUPER_ADMIN',
+  ADMIN = 'ADMIN',
+  MANAGER = 'MANAGER',
+}
 
 export class RegisterUserDto {
   @IsString()
@@ -40,4 +47,29 @@ export class UserFiltersDto {
   role: string;
 
   company: string;
+}
+
+export class ModifyUserDto {
+  @IsString({ always: true })
+  readonly firstName: string;
+
+  @IsString({ always: true })
+  readonly lastName: string;
+
+  @IsEmail()
+  email: string;
+
+  @IsEnum([UserStatus.ACTIVE, UserStatus.INACTIVE], {
+    groups: [GroupsValidation.SUPER_ADMIN, GroupsValidation.ADMIN],
+  })
+  status: string;
+
+  @IsEnum(UserRoles, {
+    each: true,
+    groups: [GroupsValidation.SUPER_ADMIN, GroupsValidation.ADMIN],
+  })
+  roles: UserRoles[];
+
+  @IsMongoId({ groups: [GroupsValidation.SUPER_ADMIN] })
+  company: mongoose.Schema.Types.ObjectId;
 }

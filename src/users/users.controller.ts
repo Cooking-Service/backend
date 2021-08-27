@@ -5,6 +5,7 @@ import {
   NotFoundException,
   Param,
   Post,
+  Put,
   Query,
   UsePipes,
   ValidationPipe,
@@ -12,7 +13,12 @@ import {
 import { Roles } from 'src/auth/roles.decorator';
 import { CurrentUser } from 'src/auth/user.guard';
 import { ResponseDto } from 'src/common/dto/response.dto';
-import { RegisterUserDto, UserFiltersDto } from './dto/users.dto';
+import {
+  GroupsValidation,
+  ModifyUserDto,
+  RegisterUserDto,
+  UserFiltersDto,
+} from './dto/users.dto';
 import { User, UserRoles } from './schemas/user.schema';
 import { UsersService } from './users.service';
 
@@ -56,7 +62,7 @@ export class UsersController {
     ) {
       const company: any = currentUser.company;
       if (user.response.company['_id'] !== company) {
-        throw new NotFoundException('User Not Found');
+        throw new NotFoundException('User Not Found.');
       }
     }
 
@@ -89,5 +95,55 @@ export class UsersController {
       registerUserDto.company = company;
     }
     return await this.service.create(registerUserDto, currentUser);
+  }
+
+  @Put()
+  @UsePipes(
+    new ValidationPipe({
+      skipMissingProperties: true,
+      groups: [GroupsValidation.PROFILE],
+    }),
+  )
+  async modifyProfile(
+    @Body() modifyUserDto: ModifyUserDto,
+    @CurrentUser() currentUser: User,
+  ): Promise<ResponseDto<User>> {
+    delete modifyUserDto.company;
+    delete modifyUserDto.roles;
+    delete modifyUserDto.status;
+
+    return await this.service.modify(
+      currentUser['_id'],
+      modifyUserDto,
+      currentUser,
+    );
+  }
+
+  @Put(':id')
+  @UsePipes(
+    new ValidationPipe({
+      skipMissingProperties: true,
+      groups: [GroupsValidation.ADMIN, GroupsValidation.SUPER_ADMIN],
+    }),
+  )
+  @Roles(UserRoles.SUPER_ADMIN, UserRoles.ADMIN)
+  async modifyUserById(
+    @Param('id') id: string,
+    @Body() modifyUserDto: ModifyUserDto,
+    @CurrentUser() currentUser: User,
+  ): Promise<ResponseDto<User>> {
+    if (currentUser.roles.includes(UserRoles.ADMIN)) {
+      const company: any = currentUser.company;
+      const { response: userToUpdate } = await this.service.getUserById(id);
+
+      if (userToUpdate.company['_id'] !== company) {
+        throw new NotFoundException('User Not Found.');
+      }
+      const superIndex = modifyUserDto.roles.indexOf(UserRoles.SUPER_ADMIN);
+      modifyUserDto.roles.splice(superIndex);
+      delete modifyUserDto.company;
+    }
+    delete modifyUserDto.company;
+    return await this.service.modify(id, modifyUserDto, currentUser);
   }
 }

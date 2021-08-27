@@ -10,7 +10,11 @@ import { Model } from 'mongoose';
 import { ResponseDto } from 'src/common/dto/response.dto';
 import { EmailTemplate, sendEmail } from 'src/common/mailer/node.mailer';
 import { CompaniesService } from 'src/companies/companies.service';
-import { RegisterUserDto, UserFiltersDto } from './dto/users.dto';
+import {
+  ModifyUserDto,
+  RegisterUserDto,
+  UserFiltersDto,
+} from './dto/users.dto';
 import { HashType } from './schemas/user-hash.schema';
 import {
   User,
@@ -229,7 +233,7 @@ export class UsersService {
 
         return {
           success: false,
-          message: 'The company does not exist',
+          message: 'Company does not exist.',
         };
       }
 
@@ -266,7 +270,7 @@ export class UsersService {
 
       // Send Email to confirm and active account.
       const hashEncoded = encodeURIComponent(hash.response.hash);
-      const link = `${this.config.get('FE_DOMAIN')}/?token=${hashEncoded}`;
+      const link = `${this.config.get('FE_DOMAIN')}?token=${hashEncoded}`;
 
       const emailConfirmation = await sendEmail({
         to: user.email,
@@ -291,6 +295,125 @@ export class UsersService {
       };
     } catch (error) {
       await session.abortTransaction();
+      throw new InternalServerErrorException();
+    } finally {
+      session.endSession();
+    }
+  }
+
+  async modify(
+    id: string,
+    modifyUserDto: ModifyUserDto,
+    updatedBy: User,
+  ): Promise<ResponseDto<User>> {
+    const session = await this.connection.startSession();
+
+    session.startTransaction();
+
+    try {
+      const {
+        firstName,
+        lastName,
+        roles,
+        status,
+        company: companyId,
+      } = modifyUserDto;
+
+      // verify if user exist.
+      const user = await this.userModel.findById(id).session(session);
+      if (!user) {
+        throw new NotFoundException('User Not Found.');
+      }
+
+      // if email has been send to update, verify if exist on database.
+      if (modifyUserDto?.email) {
+        if (modifyUserDto.email !== user.email) {
+          const userByEmail = await this.userModel
+            .findOne({ email: modifyUserDto.email })
+            .session(session);
+          if (userByEmail) {
+            await session.abortTransaction();
+            return {
+              success: false,
+              message: 'The email is already registered in the system.',
+            };
+          }
+          user.email = modifyUserDto.email;
+          user.status = UserStatus.PENDINDG;
+        } else {
+          delete modifyUserDto.email;
+        }
+      }
+
+      // if company has been send to update, verify if exist on database.
+      // TODO: is necesary?
+      if (companyId) {
+        const { response: company } = await this.companiesService.findById(
+          companyId,
+        );
+        if (!company) {
+          await session.abortTransaction();
+
+          return {
+            success: false,
+            message: 'Company does not exist',
+          };
+        }
+        user.company = company;
+      }
+
+      // apply changes to user.
+      user.updatedOn = new Date();
+      user.updatedBy = updatedBy;
+      firstName ? (user.firstName = firstName) : null;
+      lastName ? (user.lastName = lastName) : null;
+      roles ? (user.roles = roles) : null;
+      status ? (user.status = status) : null;
+
+      await user.save({ session });
+
+      // if email has been updated, send new email to active account
+      if (modifyUserDto?.email) {
+        const { response: hash } = await this.usersHashesService.generateHash(
+          user,
+          HashType.ACTIVE_ACCOUNT,
+          session,
+        );
+        const hashEncoded = encodeURIComponent(hash.hash);
+        const link = `${this.config.get('FE_DOMAIN')}?token=${hashEncoded}`;
+
+        const emailConfirmation = await sendEmail({
+          to: user.email,
+          subject: 'Active Account',
+          payload: {
+            link,
+          },
+          template: EmailTemplate.ACTIVE_ACCOUNT,
+        });
+
+        if (!emailConfirmation.success) {
+          throw new Error('send email');
+        }
+      }
+
+      await session.commitTransaction();
+
+      const { response: userRes } = await this.getUserById(id);
+
+      // TODO: Is necessary to send response<User>?
+      return {
+        success: true,
+        message: `User Successsfully Updated. ${
+          modifyUserDto?.email ? 'Please Active Account' : ''
+        }`,
+        response: userRes,
+      };
+    } catch (error) {
+      await session.abortTransaction();
+      if (error.status === 404) {
+        throw error;
+      }
+
       throw new InternalServerErrorException();
     } finally {
       session.endSession();

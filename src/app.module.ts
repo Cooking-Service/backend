@@ -6,15 +6,15 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
 import { JwtAuthGuard } from './auth/jwt-auth.guard';
-import { UsersModule } from './users/users.module';
 import { RolesGuard } from './auth/roles.guard';
-import { CompaniesModule } from './companies/companies.module';
-import { ReportsModule } from './reports/reports.module';
+import { BranchesUsersModule } from './branches-users/branches-users.module';
 import { BranchesModule } from './branches/branches.module';
-import { TablesModule } from './tables/tables.module';
+import { CompaniesModule } from './companies/companies.module';
 import { OrdersModule } from './orders/orders.module';
 import { ProductsModule } from './products/products.module';
-import { BranchesUsersModule } from './branches-users/branches-users.module';
+import { ReportsModule } from './reports/reports.module';
+import { TablesModule } from './tables/tables.module';
+import { UsersModule } from './users/users.module';
 
 @Module({
   imports: [
@@ -25,6 +25,7 @@ import { BranchesUsersModule } from './branches-users/branches-users.module';
     }),
     MongooseModule.forRoot(
       `mongodb+srv://${process.env.MONGO_USER}:${process.env.MONGO_PASS}@${process.env.MONGO_HOST}/${process.env.MONGO_NAME}?retryWrites=true&w=majority`,
+      { useCreateIndex: true },
     ),
     CompaniesModule,
     ReportsModule,
