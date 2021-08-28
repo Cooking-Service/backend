@@ -7,14 +7,16 @@ import { EmailDto } from '../dto/email.dto';
 export enum EmailTemplate {
   TEST = 'test',
   ACTIVE_ACCOUNT = 'active-account',
+  PASSWORD_RESET = 'password-reset',
 }
 
 export const sendEmail = async (data: EmailDto) => {
   const from = process.env.FROM_EMAIL;
   const pass = process.env.PASS_EMAIL;
+  const service = process.env.SERVICE_EMAIL;
 
   const transporter = nodemailer.createTransport({
-    service: 'outlook',
+    service,
     auth: {
       user: from,
       pass: pass,
@@ -30,6 +32,8 @@ export const sendEmail = async (data: EmailDto) => {
     case EmailTemplate.ACTIVE_ACCOUNT:
       templateFile = 'active-account.hbs';
       break;
+    case EmailTemplate.PASSWORD_RESET:
+      templateFile = 'password-reset.hbs';
   }
 
   const templateSource = fs.readFileSync(
@@ -55,6 +59,7 @@ export const sendEmail = async (data: EmailDto) => {
       };
     })
     .catch((err) => {
+      console.log(err)
       return {
         success: false,
         error: err,
