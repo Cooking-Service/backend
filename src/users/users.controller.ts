@@ -145,6 +145,15 @@ export class UsersController {
     );
   }
 
+  @Put('deletion/:id')
+  @Roles(UserRoles.SUPER_ADMIN)
+  async userDeletion(
+    @Param('id') id: string,
+    @CurrentUser() currentUser: User,
+  ): Promise<ResponseDto<any>> {
+    return await this.service.userDeletion(id, currentUser);
+  }
+
   @Put(':id')
   @UsePipes(
     new ValidationPipe({

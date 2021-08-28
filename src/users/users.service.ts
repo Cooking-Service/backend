@@ -618,4 +618,43 @@ export class UsersService {
       session.endSession();
     }
   }
+
+  async userDeletion(id: string, deletedBy: User): Promise<ResponseDto<any>> {
+    try {
+      const user = await this.userModel.findByIdAndUpdate(id, {
+        $unset: {
+          firstName: 1,
+          lastName: 1,
+          email: 1,
+          createdOn: 1,
+          createdBy: 1,
+          updatedOn: 1,
+          updatedBy: 1,
+          lastLogin: 1,
+          avatar: 1,
+          password: 1,
+          roles: 1,
+        },
+        $set: {
+          username: `Deleted By ${deletedBy['_id']} on ${Date.now()}`,
+          status: UserStatus.DELETED,
+        },
+      });
+
+      if (!user) {
+        throw new NotFoundException();
+      }
+
+      return {
+        success: true,
+        message: 'User Successfully Deleted.',
+      };
+    } catch (error) {
+      if (error?.status === 404) {
+        throw error;
+      }
+
+      throw new InternalServerErrorException();
+    }
+  }
 }
