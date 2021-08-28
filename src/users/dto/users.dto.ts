@@ -82,3 +82,11 @@ export class ModifyPasswordDto {
   @MinLength(8)
   readonly newPassword: string;
 }
+
+export class ActivateAccountDto {
+  @IsString()
+  readonly token: string;
+
+  @MinLength(8)
+  readonly password: string;
+}

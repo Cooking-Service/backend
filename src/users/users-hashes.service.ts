@@ -5,9 +5,9 @@ import * as mongoose from 'mongoose';
 import { Model } from 'mongoose';
 import { ResponseDto } from 'src/common/dto/response.dto';
 import {
-    HashType,
-    UserHash,
-    UserHashDocument
+  HashType,
+  UserHash,
+  UserHashDocument,
 } from './schemas/user-hash.schema';
 import { User } from './schemas/user.schema';
 
@@ -40,6 +40,29 @@ export class UsersHashesService {
     return {
       success: true,
       response: await userhash.save(),
+    };
+  }
+
+  async verifyHash(
+    hash: string,
+    type: HashType,
+    session?: mongoose.ClientSession,
+  ): Promise<ResponseDto<UserHash>> {
+    const userHash = await this.userHashModel
+      .findOne({ hash })
+      .populate({ path: 'user', select: { username: 1 } });
+
+    if (!userHash || userHash.type !== type || userHash.usedOn) {
+      return {
+        success: false,
+      };
+    }
+
+    userHash.usedOn = new Date();
+
+    return {
+      success: true,
+      response: await userHash.save({ session }),
     };
   }
 }

@@ -12,9 +12,11 @@ import {
   ValidationPipe,
 } from '@nestjs/common';
 import { Roles } from 'src/auth/roles.decorator';
+import { SkipAuth } from 'src/auth/skip-auth.decorator';
 import { CurrentUser } from 'src/auth/user.guard';
 import { ResponseDto } from 'src/common/dto/response.dto';
 import {
+  ActivateAccountDto,
   GroupsValidation,
   ModifyPasswordDto,
   ModifyUserDto,
@@ -97,6 +99,19 @@ export class UsersController {
       registerUserDto.company = company;
     }
     return await this.service.create(registerUserDto, currentUser);
+  }
+
+  @Post('activation')
+  @UsePipes(
+    new ValidationPipe({
+      forbidNonWhitelisted: true,
+    }),
+  )
+  @SkipAuth()
+  async confirmation(
+    @Body() activateAccountDto: ActivateAccountDto,
+  ): Promise<ResponseDto<any>> {
+    return await this.service.activeAccount(activateAccountDto);
   }
 
   @Put()

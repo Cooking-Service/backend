@@ -1,7 +1,7 @@
 import {
   Injectable,
   InternalServerErrorException,
-  NotFoundException
+  NotFoundException,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { InjectConnection, InjectModel } from '@nestjs/mongoose';
@@ -12,17 +12,18 @@ import { ResponseDto } from 'src/common/dto/response.dto';
 import { EmailTemplate, sendEmail } from 'src/common/mailer/node.mailer';
 import { CompaniesService } from 'src/companies/companies.service';
 import {
+  ActivateAccountDto,
   ModifyPasswordDto,
   ModifyUserDto,
   RegisterUserDto,
-  UserFiltersDto
+  UserFiltersDto,
 } from './dto/users.dto';
 import { HashType } from './schemas/user-hash.schema';
 import {
   User,
   UserDocument,
   UserRoles,
-  UserStatus
+  UserStatus,
 } from './schemas/user.schema';
 import { UsersHashesService } from './users-hashes.service';
 import { generateUsername } from './utils/user.utils';
@@ -308,6 +309,7 @@ export class UsersService {
     modifyUserDto: ModifyUserDto,
     updatedBy: User,
   ): Promise<ResponseDto<User>> {
+    // session will help us to manage transaccions
     const session = await this.connection.startSession();
 
     session.startTransaction();
@@ -426,6 +428,7 @@ export class UsersService {
     id: string,
     { currentPassword, newPassword }: ModifyPasswordDto,
   ): Promise<ResponseDto<any>> {
+    // session will help us to manage transaccions
     const session = await this.connection.startSession();
 
     session.startTransaction();
@@ -459,6 +462,54 @@ export class UsersService {
       return {
         success: true,
         message: 'Password Successfully Changed.',
+      };
+    } catch (error) {
+      await session.abortTransaction();
+      throw new InternalServerErrorException();
+    } finally {
+      session.endSession();
+    }
+  }
+
+  async activeAccount({
+    token,
+    password,
+  }: ActivateAccountDto): Promise<ResponseDto<any>> {
+    // session will help us to manage transaccions
+    const session = await this.connection.startSession();
+
+    session.startTransaction();
+
+    try {
+      // check if the token(hash) exists and has not been used.
+      const { success: successHash, response: userHash } =
+        await this.usersHashesService.verifyHash(
+          token,
+          HashType.ACTIVE_ACCOUNT,
+          session,
+        );
+
+      if (!successHash) {
+        return {
+          success: false,
+          message: 'Invalid Token.',
+        };
+      }
+
+      // if the token is valid find the assigned user.
+      const user = await this.userModel.findById(userHash.user['_id']);
+      const passwordHashed = bcrypt.hashSync(password, 10);
+
+      user.password = passwordHashed;
+      user.status = UserStatus.ACTIVE;
+
+      await user.save({ session });
+
+      await session.commitTransaction();
+
+      return {
+        success: true,
+        message: 'Account Successfully Activated.',
       };
     } catch (error) {
       await session.abortTransaction();
