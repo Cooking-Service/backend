@@ -407,7 +407,7 @@ export class UsersService {
       // TODO: Is necessary to send response<User>?
       return {
         success: true,
-        message: `User Successsfully Updated. ${
+        message: `User Successfully Updated. ${
           modifyUserDto?.email ? 'Please Active Account' : ''
         }`,
         response: userRes,
@@ -513,6 +513,106 @@ export class UsersService {
       };
     } catch (error) {
       await session.abortTransaction();
+      throw new InternalServerErrorException();
+    } finally {
+      session.endSession();
+    }
+  }
+
+  async passwordForgotten(email: string): Promise<ResponseDto<any>> {
+    try {
+      const user = await this.userModel.findOne({ email }).select({
+        email: 1,
+        username: 1,
+        firstName: 1,
+      });
+
+      if (!user) {
+        return {
+          success: false,
+          message: 'The email does not registered on the system.',
+        };
+      }
+
+      const { response: userHash } = await this.usersHashesService.generateHash(
+        user,
+        HashType.RECOVERY_PASSWORD,
+      );
+
+      if (!userHash) {
+        throw new Error();
+      }
+
+      const hashEncoded = encodeURIComponent(userHash.hash);
+      const link = `${this.config.get('FE_DOMAIN')}?token=${hashEncoded}`;
+
+      const emailPassReset = await sendEmail({
+        to: user.email,
+        subject: 'Password Reset',
+        payload: {
+          link,
+        },
+        template: EmailTemplate.PASSWORD_RESET,
+      });
+
+      if (!emailPassReset?.success) {
+        throw new Error();
+      }
+
+      return {
+        success: true,
+        message: 'An email to reset your password has been sent.',
+      };
+    } catch (error) {
+      throw new InternalServerErrorException();
+    }
+  }
+
+  async resetPassword({
+    token,
+    password,
+  }: ActivateAccountDto): Promise<ResponseDto<any>> {
+    const session = await this.connection.startSession();
+
+    session.startTransaction();
+
+    try {
+      const { success: hashSuccess, response: userHash } =
+        await this.usersHashesService.verifyHash(
+          token,
+          HashType.RECOVERY_PASSWORD,
+          session,
+        );
+
+      if (!hashSuccess) {
+        return {
+          success: false,
+          message: 'Invalid Token.',
+        };
+      }
+
+      const user = await this.userModel
+        .findById(userHash.user['_id'])
+        .session(session)
+        .select({
+          password: 1,
+        });
+
+      const passwordHashed = bcrypt.hashSync(password, 10);
+
+      user.password = passwordHashed;
+
+      await user.save({ session });
+
+      await session.commitTransaction();
+
+      return {
+        success: true,
+        message: 'Password Successfully Reseted.',
+      };
+    } catch (error) {
+      await session.abortTransaction();
+
       throw new InternalServerErrorException();
     } finally {
       session.endSession();

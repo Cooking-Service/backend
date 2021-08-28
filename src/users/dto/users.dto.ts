@@ -83,9 +83,10 @@ export class ModifyPasswordDto {
   readonly newPassword: string;
 }
 
+// used to activate account and reset password.
 export class ActivateAccountDto {
   @IsString()
-  readonly token: string;
+  token: string;
 
   @MinLength(8)
   readonly password: string;

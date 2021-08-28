@@ -30,16 +30,9 @@ export class UsersHashesService {
     userhash.user = user;
     userhash.type = type;
 
-    if (session) {
-      return {
-        success: true,
-        response: await userhash.save({ session }),
-      };
-    }
-
     return {
       success: true,
-      response: await userhash.save(),
+      response: await userhash.save({ session }),
     };
   }
 

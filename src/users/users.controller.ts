@@ -111,7 +111,16 @@ export class UsersController {
   async confirmation(
     @Body() activateAccountDto: ActivateAccountDto,
   ): Promise<ResponseDto<any>> {
+    activateAccountDto.token = decodeURIComponent(activateAccountDto.token);
     return await this.service.activeAccount(activateAccountDto);
+  }
+
+  @Post('password-forgotten')
+  @SkipAuth()
+  async passwordForgotten(
+    @Body() { email }: { email: string },
+  ): Promise<ResponseDto<any>> {
+    return await this.service.passwordForgotten(email);
   }
 
   @Put()
@@ -160,6 +169,7 @@ export class UsersController {
       modifyUserDto.roles.splice(superIndex);
       delete modifyUserDto.company;
     }
+    // now is impossible modify company (check username)
     delete modifyUserDto.company;
     return await this.service.modify(id, modifyUserDto, currentUser);
   }
@@ -175,5 +185,19 @@ export class UsersController {
     @CurrentUser() currentUser: User,
   ): Promise<ResponseDto<any>> {
     return await this.service.changePassword(currentUser['_id'], passwordsDto);
+  }
+
+  @Patch('password-reset')
+  @UsePipes(
+    new ValidationPipe({
+      forbidNonWhitelisted: true,
+    }),
+  )
+  @SkipAuth()
+  async resetPassword(
+    @Body() resetPasswordDto: ActivateAccountDto,
+  ): Promise<ResponseDto<any>> {
+    resetPasswordDto.token = decodeURIComponent(resetPasswordDto.token);
+    return await this.service.resetPassword(resetPasswordDto);
   }
 }
