@@ -273,7 +273,9 @@ export class UsersService {
 
       // Send Email to confirm and active account.
       const hashEncoded = encodeURIComponent(hash.response.hash);
-      const link = `${this.config.get('FE_DOMAIN')}?token=${hashEncoded}`;
+      const link = `${this.config.get(
+        'FE_DOMAIN',
+      )}/auth/account-activation?token=${hashEncoded}`;
 
       const emailConfirmation = await sendEmail({
         to: user.email,
@@ -544,11 +546,13 @@ export class UsersService {
       }
 
       const hashEncoded = encodeURIComponent(userHash.hash);
-      const link = `${this.config.get('FE_DOMAIN')}?token=${hashEncoded}`;
+      const link = `${this.config.get(
+        'FE_DOMAIN',
+      )}/auth/password-reset?token=${hashEncoded}`;
 
       const emailPassReset = await sendEmail({
         to: user.email,
-        subject: 'Password Reset',
+        subject: 'Reset Password',
         payload: {
           link,
         },
@@ -587,7 +591,8 @@ export class UsersService {
       if (!hashSuccess) {
         return {
           success: false,
-          message: 'Invalid Token.',
+          message:
+            'The token to reset your password is invalid. Try to request a new password reset',
         };
       }
 

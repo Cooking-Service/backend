@@ -59,7 +59,6 @@ export const sendEmail = async (data: EmailDto) => {
       };
     })
     .catch((err) => {
-      console.log(err)
       return {
         success: false,
         error: err,
