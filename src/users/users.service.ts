@@ -275,7 +275,7 @@ export class UsersService {
       const hashEncoded = encodeURIComponent(hash.response.hash);
       const link = `${this.config.get(
         'FE_DOMAIN',
-      )}/auth/account-activation?token=${hashEncoded}`;
+      )}/auth/activate-account?token=${hashEncoded}`;
 
       const emailConfirmation = await sendEmail({
         to: user.email,
@@ -548,7 +548,7 @@ export class UsersService {
       const hashEncoded = encodeURIComponent(userHash.hash);
       const link = `${this.config.get(
         'FE_DOMAIN',
-      )}/auth/password-reset?token=${hashEncoded}`;
+      )}/auth/reset-password?token=${hashEncoded}`;
 
       const emailPassReset = await sendEmail({
         to: user.email,
