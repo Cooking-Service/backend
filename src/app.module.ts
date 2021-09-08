@@ -15,11 +15,10 @@ import { ProductsModule } from './products/products.module';
 import { ReportsModule } from './reports/reports.module';
 import { TablesModule } from './tables/tables.module';
 import { UsersModule } from './users/users.module';
+import { FilesModule } from './files/files.module';
 
 @Module({
   imports: [
-    UsersModule,
-    AuthModule,
     ConfigModule.forRoot({
       isGlobal: true,
     }),
@@ -27,6 +26,8 @@ import { UsersModule } from './users/users.module';
       `mongodb+srv://${process.env.MONGO_USER}:${process.env.MONGO_PASS}@${process.env.MONGO_HOST}/${process.env.MONGO_NAME}?retryWrites=true&w=majority`,
       { useCreateIndex: true },
     ),
+    UsersModule,
+    AuthModule,
     CompaniesModule,
     ReportsModule,
     BranchesModule,
@@ -34,6 +35,7 @@ import { UsersModule } from './users/users.module';
     OrdersModule,
     ProductsModule,
     BranchesUsersModule,
+    FilesModule,
   ],
   controllers: [AppController],
   providers: [
