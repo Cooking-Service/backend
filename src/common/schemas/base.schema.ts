@@ -13,7 +13,7 @@ export class Base {
   @Prop({
     type: String,
     enum: Status,
-    default: null,
+    default: Status.ACTIVE,
   })
   status: string;
 
