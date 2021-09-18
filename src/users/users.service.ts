@@ -10,6 +10,7 @@ import * as mongoose from 'mongoose';
 import { Model } from 'mongoose';
 import { ResponseDto } from 'src/common/dto/response.dto';
 import { EmailTemplate, sendEmail } from 'src/common/mailer/node.mailer';
+import { countRecords } from 'src/common/utils/utils';
 import { CompaniesService } from 'src/companies/companies.service';
 import {
   ActivateAccountDto,
@@ -103,21 +104,21 @@ export class UsersService {
       ],
       status: status ? { $eq: status } : { $ne: UserStatus.DELETED },
       roles: role ? { $in: [role] } : { $in: Object.values(UserRoles) },
-      companyFilter: company ? { $eq: company } : { $regex: '' },
+      companyFilter: company ? { $eq: company.toString() } : { $regex: '' },
     };
 
-    await this.userModel.find();
+    const extraFields = {
+      nameFilter: {
+        $concat: ['$firstName', ' ', '$lastName'],
+      },
+      companyFilter: {
+        $toString: '$company',
+      },
+    };
 
     const users = await this.userModel
       .aggregate()
-      .addFields({
-        nameFilter: {
-          $concat: ['$firstName', ' ', '$lastName'],
-        },
-        companyFilter: {
-          $toString: '$company',
-        },
-      })
+      .addFields(extraFields)
       .match(matchQuery)
       .project({
         _id: 1,
@@ -133,20 +134,11 @@ export class UsersService {
       .skip(skip * limit - limit)
       .limit(limit);
 
-    const totalUsers: object[] = await this.userModel
-      .aggregate()
-      .addFields({
-        nameFilter: {
-          $concat: ['$firstName', ' ', '$lastName'],
-        },
-        companyFilter: {
-          $toString: '$company',
-        },
-      })
-      .match(matchQuery)
-      .count('total');
-
-    const totalRecords = totalUsers.length === 0 ? 0 : totalUsers[0]['total'];
+    const totalRecords = await countRecords(
+      this.userModel,
+      matchQuery,
+      extraFields,
+    );
 
     const totalPages = Math.ceil(totalRecords / limit);
 
