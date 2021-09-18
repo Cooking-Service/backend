@@ -7,15 +7,17 @@ import { User } from 'src/users/schemas/user.schema';
 
 export type BranchDocument = Branch & Document;
 
-@Schema()
+@Schema({
+  versionKey: false,
+})
 export class Branch extends Base {
   @Prop()
   name: string;
 
-  @Prop()
+  @Prop({ default: null })
   latitude: string;
 
-  @Prop()
+  @Prop({ default: null })
   longitude: string;
 
   @Prop({
