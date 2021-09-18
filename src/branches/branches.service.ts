@@ -3,9 +3,10 @@ import { InjectConnection, InjectModel } from '@nestjs/mongoose';
 import * as mongoose from 'mongoose';
 import { Model } from 'mongoose';
 import { ResponseDto } from 'src/common/dto/response.dto';
+import { countRecords } from 'src/common/utils/utils';
 import { CompaniesService } from 'src/companies/companies.service';
-import { User } from 'src/users/schemas/user.schema';
-import { CreateBranchDto } from './dto/branches.dto';
+import { User, UserStatus } from 'src/users/schemas/user.schema';
+import { BranchFiltersDto, CreateBranchDto } from './dto/branches.dto';
 import { Branch, BranchDocument } from './schemas/branch.schema';
 
 @Injectable()
@@ -15,6 +16,64 @@ export class BranchesService {
     @InjectConnection() private connection: mongoose.Connection,
     private companiesService: CompaniesService,
   ) {}
+
+  async getBranchList(filters: BranchFiltersDto): Promise<ResponseDto<any>> {
+    let {
+      limit = 10,
+      skip = 1,
+      search = '',
+      status = null,
+      sortBy = '-createdOn',
+      company = null,
+    } = filters;
+
+    if (typeof limit === 'string') {
+      limit = parseInt(limit);
+    }
+
+    if (typeof skip === 'string') {
+      skip = parseInt(skip);
+    }
+
+    const matchQuery = {
+      name: { $regex: search, $options: 'i' },
+      status: status ? { $eq: status } : { $ne: UserStatus.DELETED },
+      companyFilter: company ? { $eq: company.toString() } : { $regex: '' },
+    };
+
+    const extraFields = {
+      companyFilter: {
+        $toString: '$company',
+      },
+    };
+
+    const branches = await this.branchModel
+      .aggregate()
+      .addFields(extraFields)
+      .match(matchQuery)
+      .sort(sortBy)
+      .skip(skip * limit - limit)
+      .limit(limit);
+
+    const totalRecords = await countRecords(
+      this.branchModel,
+      matchQuery,
+      extraFields,
+    );
+
+    const totalPages = Math.ceil(totalRecords / limit);
+
+    return {
+      success: true,
+      response: {
+        skip,
+        limit,
+        totalPages,
+        totalRecords,
+        records: branches,
+      },
+    };
+  }
 
   async create(
     createBranchDto: CreateBranchDto,

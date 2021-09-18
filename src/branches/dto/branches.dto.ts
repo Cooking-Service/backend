@@ -5,6 +5,7 @@ import {
   IsOptional,
   IsString,
 } from 'class-validator';
+import { FilterDto } from 'src/common/dto/base-filter.dto';
 
 export class CreateBranchDto {
   @IsString()
@@ -21,4 +22,8 @@ export class CreateBranchDto {
   @IsOptional()
   @IsLongitude()
   longitude: string;
+}
+
+export class BranchFiltersDto extends FilterDto {
+  company: string;
 }
