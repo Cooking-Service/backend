@@ -2,7 +2,12 @@ import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { InjectConnection, InjectModel } from '@nestjs/mongoose';
 import * as mongoose from 'mongoose';
 import { Model } from 'mongoose';
+import { PaginationDto } from 'src/common/dto/pagination.dto';
 import { ResponseDto } from 'src/common/dto/response.dto';
+import {
+  BRANCH_ITEM_LIST_SELECT,
+  COMPANY_SUBDOC_SELECT,
+} from 'src/common/dto/select.structures';
 import { countRecords } from 'src/common/utils/utils';
 import { CompaniesService } from 'src/companies/companies.service';
 import { User, UserStatus } from 'src/users/schemas/user.schema';
@@ -17,7 +22,9 @@ export class BranchesService {
     private companiesService: CompaniesService,
   ) {}
 
-  async getBranchList(filters: BranchFiltersDto): Promise<ResponseDto<any>> {
+  async getBranchList(
+    filters: BranchFiltersDto,
+  ): Promise<ResponseDto<PaginationDto<Branch>>> {
     let {
       limit = 10,
       skip = 1,
@@ -51,9 +58,14 @@ export class BranchesService {
       .aggregate()
       .addFields(extraFields)
       .match(matchQuery)
+      .project(BRANCH_ITEM_LIST_SELECT)
       .sort(sortBy)
       .skip(skip * limit - limit)
       .limit(limit);
+
+    await this.branchModel.populate(branches, [
+      { path: 'company', select: COMPANY_SUBDOC_SELECT },
+    ]);
 
     const totalRecords = await countRecords(
       this.branchModel,

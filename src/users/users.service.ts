@@ -8,7 +8,14 @@ import { InjectConnection, InjectModel } from '@nestjs/mongoose';
 import * as bcrypt from 'bcrypt';
 import * as mongoose from 'mongoose';
 import { Model } from 'mongoose';
+import { PaginationDto } from 'src/common/dto/pagination.dto';
 import { ResponseDto } from 'src/common/dto/response.dto';
+import {
+  COMPANY_SUBDOC_SELECT,
+  USER_ITEM_LIST_SELECT,
+  USER_PROFILE_SELECT,
+  USER_SUBDOC_SELECT,
+} from 'src/common/dto/select.structures';
 import { EmailTemplate, sendEmail } from 'src/common/mailer/node.mailer';
 import { countRecords } from 'src/common/utils/utils';
 import { CompaniesService } from 'src/companies/companies.service';
@@ -59,17 +66,10 @@ export class UsersService {
   async getProfile(username: string): Promise<ResponseDto<User>> {
     const user = await this.userModel
       .findOne({ username })
-      .select({
-        createdOn: 0,
-        createdBy: 0,
-        updatedOn: 0,
-        updatedBy: 0,
-        status: 0,
-        lastLogin: 0,
-      })
+      .select(USER_PROFILE_SELECT)
       .populate({
         path: 'company',
-        select: '-createdOn -createdBy -updatedOn -updatedBy',
+        select: COMPANY_SUBDOC_SELECT,
       });
     return {
       success: true,
@@ -77,7 +77,9 @@ export class UsersService {
     };
   }
 
-  async getUserList(filters: UserFiltersDto): Promise<ResponseDto<any>> {
+  async getUserList(
+    filters: UserFiltersDto,
+  ): Promise<ResponseDto<PaginationDto<User>>> {
     let {
       limit = 10,
       skip = 1,
@@ -120,16 +122,7 @@ export class UsersService {
       .aggregate()
       .addFields(extraFields)
       .match(matchQuery)
-      .project({
-        _id: 1,
-        createdOn: 1,
-        status: 1,
-        roles: 1,
-        lastName: 1,
-        email: 1,
-        username: 1,
-        firstName: 1,
-      })
+      .project(USER_ITEM_LIST_SELECT)
       .sort(sortBy)
       .skip(skip * limit - limit)
       .limit(limit);
@@ -162,22 +155,15 @@ export class UsersService {
     const user = await this.userModel.findById(id).populate([
       {
         path: 'company',
-        select: {
-          name: 1,
-          logo: 1,
-        },
+        select: COMPANY_SUBDOC_SELECT,
       },
       {
         path: 'createdBy',
-        select: {
-          username: 1,
-        },
+        select: USER_SUBDOC_SELECT,
       },
       {
         path: 'updatedBy',
-        select: {
-          username: 1,
-        },
+        select: USER_SUBDOC_SELECT,
       },
     ]);
 
