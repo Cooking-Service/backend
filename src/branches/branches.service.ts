@@ -1,7 +1,13 @@
-import { Injectable, InternalServerErrorException } from '@nestjs/common';
+import {
+  ForbiddenException,
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectConnection, InjectModel } from '@nestjs/mongoose';
 import * as mongoose from 'mongoose';
 import { Model } from 'mongoose';
+import { CurrentUser } from 'src/auth/user.guard';
 import { PaginationDto } from 'src/common/dto/pagination.dto';
 import { ResponseDto } from 'src/common/dto/response.dto';
 import {
@@ -10,8 +16,12 @@ import {
 } from 'src/common/dto/select.structures';
 import { countRecords } from 'src/common/utils/utils';
 import { CompaniesService } from 'src/companies/companies.service';
-import { User, UserStatus } from 'src/users/schemas/user.schema';
-import { BranchFiltersDto, CreateBranchDto } from './dto/branches.dto';
+import { User, UserRoles, UserStatus } from 'src/users/schemas/user.schema';
+import {
+  BranchFiltersDto,
+  CreateBranchDto,
+  ModifyBranchDto,
+} from './dto/branches.dto';
 import { Branch, BranchDocument } from './schemas/branch.schema';
 
 @Injectable()
@@ -101,7 +111,7 @@ export class BranchesService {
       const company = await this.companiesService.findById(companyId);
 
       if (!company?.success) {
-        session.abortTransaction();
+        await session.abortTransaction();
         return {
           success: false,
           message: 'Company Does Not Exist.',
@@ -114,11 +124,11 @@ export class BranchesService {
       });
 
       if (existBranch) {
-        session.abortTransaction();
+        await session.abortTransaction();
 
         return {
           success: false,
-          message: 'A branch with this name already exists',
+          message: 'A branch with this name already exists.',
         };
       }
 
@@ -155,6 +165,72 @@ export class BranchesService {
     } catch (error) {
       await session.abortTransaction();
       throw new InternalServerErrorException();
+    } finally {
+      session.endSession();
+    }
+  }
+
+  async modify(
+    id: string,
+    modifyBranchDto: ModifyBranchDto,
+    updatedBy: User,
+  ): Promise<ResponseDto<Branch>> {
+    const session = await this.connection.startSession();
+
+    session.startTransaction();
+
+    try {
+      const { name, status, latitude, longitude } = modifyBranchDto;
+
+      if (!mongoose.Types.ObjectId.isValid(id)) {
+        throw new NotFoundException('Branch Does Not Exist.');
+      }
+
+      const branch = await this.branchModel.findById(id).session(session);
+
+      if (
+        updatedBy.roles.includes(UserRoles.ADMIN) &&
+        branch.company.toString() !== updatedBy.company.toString()
+      ) {
+        throw new ForbiddenException();
+      }
+
+      if (!branch) {
+        throw new NotFoundException('Branch Does Not Exist.');
+      }
+
+      if (name && name !== branch.name) {
+        const existName = await this.branchModel.findOne({
+          company: branch.company,
+          name,
+        });
+
+        if (existName) {
+          await session.abortTransaction();
+          return {
+            success: false,
+            message: 'A branch with this name already exists.',
+          };
+        }
+      }
+
+      branch.updatedBy = updatedBy;
+      branch.updatedOn = new Date();
+      name ? (branch.name = name) : null;
+      status ? (branch.status = status) : null;
+      latitude ? (branch.latitude = latitude) : null;
+      longitude ? (branch.longitude = longitude) : null;
+
+      await branch.save({ session });
+
+      await session.commitTransaction();
+      return {
+        success: true,
+        message: 'Branch Successfully Updated.',
+      };
+    } catch (error) {
+      await session.abortTransaction();
+      throw error;
     } finally {
       session.endSession();
     }

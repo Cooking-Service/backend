@@ -1,4 +1,5 @@
 import {
+  IsEnum,
   IsLatitude,
   IsLongitude,
   IsMongoId,
@@ -6,6 +7,7 @@ import {
   IsString,
 } from 'class-validator';
 import { FilterDto } from 'src/common/dto/base-filter.dto';
+import { Status } from 'src/common/schemas/base.schema';
 
 export class CreateBranchDto {
   @IsString()
@@ -26,4 +28,18 @@ export class CreateBranchDto {
 
 export class BranchFiltersDto extends FilterDto {
   company: string;
+}
+
+export class ModifyBranchDto {
+  @IsString()
+  name: string;
+
+  @IsLatitude()
+  latitude: string;
+
+  @IsLongitude()
+  longitude: string;
+
+  @IsEnum([Status.ACTIVE, Status.INACTIVE])
+  status: string;
 }

@@ -2,7 +2,9 @@ import {
   Body,
   Controller,
   Get,
+  Param,
   Post,
+  Put,
   Query,
   UsePipes,
   ValidationPipe,
@@ -12,7 +14,11 @@ import { CurrentUser } from 'src/auth/user.guard';
 import { ResponseDto } from 'src/common/dto/response.dto';
 import { User, UserRoles } from 'src/users/schemas/user.schema';
 import { BranchesService } from './branches.service';
-import { BranchFiltersDto, CreateBranchDto } from './dto/branches.dto';
+import {
+  BranchFiltersDto,
+  CreateBranchDto,
+  ModifyBranchDto,
+} from './dto/branches.dto';
 import { Branch } from './schemas/branch.schema';
 
 @Controller('branches')
@@ -51,5 +57,20 @@ export class BranchesController {
       createBranchDto.company = company;
     }
     return await this.service.create(createBranchDto, currentUser);
+  }
+
+  @Put(':id')
+  @UsePipes(
+    new ValidationPipe({
+      skipMissingProperties: true,
+    }),
+  )
+  @Roles(UserRoles.SUPER_ADMIN, UserRoles.ADMIN)
+  async modify(
+    @Param('id') id: string,
+    @Body() modifyBranchDto: ModifyBranchDto,
+    @CurrentUser() currentUser: User,
+  ): Promise<ResponseDto<Branch>> {
+    return await this.service.modify(id, modifyBranchDto, currentUser);
   }
 }
