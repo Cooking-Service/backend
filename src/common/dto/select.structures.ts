@@ -33,3 +33,21 @@ export const BRANCH_ITEM_LIST_SELECT = {
   createdOn: 1,
   company: 1,
 };
+
+export const EMPLOYEE_LIST_SELECT = {
+  _id: '$user._id',
+  firstName: '$user.firstName',
+  lastName: '$user.lastName',
+  username: '$user.username',
+  email: '$user.email',
+  status: '$user.status',
+  employeeType: 1,
+};
+
+export const CONTACT_LIST_SELECT = {
+  _id: '$user._id',
+  firstName: '$user.firstName',
+  lastName: '$user.lastName',
+  username: '$user.username',
+  employeeType: 1,
+};

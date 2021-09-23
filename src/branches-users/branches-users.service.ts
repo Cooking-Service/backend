@@ -11,6 +11,10 @@ import { AssignBranchUserDto } from 'src/branches/dto/branches.dto';
 import { FilterDto } from 'src/common/dto/base-filter.dto';
 import { PaginationDto } from 'src/common/dto/pagination.dto';
 import { ResponseDto } from 'src/common/dto/response.dto';
+import {
+  CONTACT_LIST_SELECT,
+  EMPLOYEE_LIST_SELECT,
+} from 'src/common/dto/select.structures';
 import { RegisterUserDto } from 'src/users/dto/users.dto';
 import { User, UserRoles, UserStatus } from 'src/users/schemas/user.schema';
 import { UsersService } from 'src/users/users.service';
@@ -18,6 +22,7 @@ import { RegisterEmployeeDto } from './dto/branches-users.dto';
 import {
   BranchesUsers,
   BranchesUsersDocument,
+  EmployeeType,
 } from './schemas/branches-users.schema';
 
 @Injectable()
@@ -146,6 +151,8 @@ export class BranchesUsersService {
   async getEmployeeList(
     branch: string,
     filters: FilterDto,
+    currentEmployeeType: EmployeeType,
+    currentUser: User,
   ): Promise<ResponseDto<PaginationDto<any>>> {
     let {
       limit = 10,
@@ -163,6 +170,23 @@ export class BranchesUsersService {
       skip = parseInt(skip);
     }
 
+    const existBranch = await this.branchesService.findBranch(branch);
+
+    if (!existBranch) {
+      throw new NotFoundException('Branch Does Not Exist.');
+    }
+
+    if (currentUser.roles.includes(UserRoles.EMPLOYEE)) {
+      const isValidEmployee = await this.branchesUsersModel.findOne({
+        user: currentUser,
+        branch: existBranch,
+      });
+
+      if (!isValidEmployee) {
+        throw new ForbiddenException();
+      }
+    }
+
     const matchQuery = {
       branchFilter: { $eq: branch },
       $or: [
@@ -177,6 +201,11 @@ export class BranchesUsersService {
       nameFilter: { $concat: ['$user.firstName', ' ', '$user.lastName'] },
     };
 
+    const project =
+      currentEmployeeType === EmployeeType.MANAGER
+        ? EMPLOYEE_LIST_SELECT
+        : CONTACT_LIST_SELECT;
+
     const employees = await this.branchesUsersModel
       .aggregate()
       .lookup({
@@ -188,14 +217,7 @@ export class BranchesUsersService {
       .unwind('user')
       .addFields(extraFields)
       .match(matchQuery)
-      .project({
-        _id: '$user._id',
-        firstName: '$user.firstName',
-        lastName: '$user.lastName',
-        username: '$user.username',
-        status: '$user.status',
-        employeeType: 1,
-      })
+      .project(project)
       .sort(sortBy)
       .skip(skip * limit - limit)
       .limit(limit);

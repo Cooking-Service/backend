@@ -16,7 +16,9 @@ import { BranchesUsersService } from 'src/branches-users/branches-users.service'
 import { RegisterEmployeeDto } from 'src/branches-users/dto/branches-users.dto';
 import { EmployeeType } from 'src/branches-users/schemas/branches-users.schema';
 import { FilterDto } from 'src/common/dto/base-filter.dto';
+import { PaginationDto } from 'src/common/dto/pagination.dto';
 import { ResponseDto } from 'src/common/dto/response.dto';
+import { Status } from 'src/common/schemas/base.schema';
 import { User, UserRoles } from 'src/users/schemas/user.schema';
 import { BranchesService } from './branches.service';
 import {
@@ -52,8 +54,32 @@ export class BranchesController {
 
   @Get(':id/users')
   @Employees(EmployeeType.MANAGER)
-  async branchUsersList(@Param('id') id: string, @Query() filters: FilterDto) {
-    return await this.branchesUsersService.getEmployeeList(id, filters);
+  async branchEmployeeList(
+    @Param('id') id: string,
+    @Query() filters: FilterDto,
+    @CurrentUser() currentUser: User,
+  ): Promise<ResponseDto<PaginationDto<any>>> {
+    return await this.branchesUsersService.getEmployeeList(
+      id,
+      filters,
+      EmployeeType.MANAGER,
+      currentUser,
+    );
+  }
+
+  @Get(':id/contacts')
+  async branchCotactList(
+    @Param('id') id: string,
+    @Query() filters: FilterDto,
+    @CurrentUser() currentUser: User,
+  ): Promise<ResponseDto<PaginationDto<any>>> {
+    filters.status = Status.ACTIVE;
+    return await this.branchesUsersService.getEmployeeList(
+      id,
+      filters,
+      EmployeeType.CASHER,
+      currentUser,
+    );
   }
 
   @Post()
