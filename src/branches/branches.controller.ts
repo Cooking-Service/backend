@@ -101,7 +101,6 @@ export class BranchesController {
     @Body() registerEmployeeDto: RegisterEmployeeDto,
     @CurrentUser() currentUser: User,
   ): Promise<ResponseDto<any>> {
-    console.log(registerEmployeeDto);
     return await this.branchesUsersService.registerEmployee(
       registerEmployeeDto,
       id,
