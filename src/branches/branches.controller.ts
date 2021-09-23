@@ -9,12 +9,18 @@ import {
   UsePipes,
   ValidationPipe,
 } from '@nestjs/common';
+import { Employees } from 'src/auth/employees.decorator';
 import { Roles } from 'src/auth/roles.decorator';
 import { CurrentUser } from 'src/auth/user.guard';
+import { BranchesUsersService } from 'src/branches-users/branches-users.service';
+import { RegisterEmployeeDto } from 'src/branches-users/dto/branches-users.dto';
+import { EmployeeType } from 'src/branches-users/schemas/branches-users.schema';
+import { FilterDto } from 'src/common/dto/base-filter.dto';
 import { ResponseDto } from 'src/common/dto/response.dto';
 import { User, UserRoles } from 'src/users/schemas/user.schema';
 import { BranchesService } from './branches.service';
 import {
+  AssignBranchUserDto,
   BranchFiltersDto,
   CreateBranchDto,
   ModifyBranchDto,
@@ -23,7 +29,10 @@ import { Branch } from './schemas/branch.schema';
 
 @Controller('branches')
 export class BranchesController {
-  constructor(private service: BranchesService) {}
+  constructor(
+    private service: BranchesService,
+    private branchesUsersService: BranchesUsersService,
+  ) {}
 
   @Get()
   @Roles(UserRoles.SUPER_ADMIN, UserRoles.ADMIN, UserRoles.OBSERVER)
@@ -39,6 +48,12 @@ export class BranchesController {
       filters.company = company;
     }
     return await this.service.getBranchList(filters);
+  }
+
+  @Get(':id/users')
+  @Employees(EmployeeType.MANAGER)
+  async branchUsersList(@Param('id') id: string, @Query() filters: FilterDto) {
+    return await this.branchesUsersService.getEmployeeList(id, filters);
   }
 
   @Post()
@@ -57,6 +72,41 @@ export class BranchesController {
       createBranchDto.company = company;
     }
     return await this.service.create(createBranchDto, currentUser);
+  }
+
+  @Post(':id/users')
+  @Roles(UserRoles.SUPER_ADMIN, UserRoles.ADMIN)
+  async assignBranchUser(
+    @Param('id') id: string,
+    @Body() assignBranchUserDto: AssignBranchUserDto,
+    @CurrentUser() currentUser: User,
+  ): Promise<ResponseDto<any>> {
+    return await this.branchesUsersService.assignBranchUser(
+      assignBranchUserDto,
+      id,
+      currentUser,
+    );
+  }
+
+  @Post(':id/users/registry')
+  @UsePipes(
+    new ValidationPipe({
+      whitelist: true,
+    }),
+  )
+  @Roles(UserRoles.SUPER_ADMIN, UserRoles.ADMIN, UserRoles.EMPLOYEE)
+  @Employees(EmployeeType.MANAGER)
+  async registerEmployee(
+    @Param('id') id: string,
+    @Body() registerEmployeeDto: RegisterEmployeeDto,
+    @CurrentUser() currentUser: User,
+  ): Promise<ResponseDto<any>> {
+    console.log(registerEmployeeDto);
+    return await this.branchesUsersService.registerEmployee(
+      registerEmployeeDto,
+      id,
+      currentUser,
+    );
   }
 
   @Put(':id')

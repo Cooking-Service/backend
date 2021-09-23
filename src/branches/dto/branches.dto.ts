@@ -6,6 +6,7 @@ import {
   IsOptional,
   IsString,
 } from 'class-validator';
+import { EmployeeType } from 'src/branches-users/schemas/branches-users.schema';
 import { FilterDto } from 'src/common/dto/base-filter.dto';
 import { Status } from 'src/common/schemas/base.schema';
 
@@ -42,4 +43,12 @@ export class ModifyBranchDto {
 
   @IsEnum([Status.ACTIVE, Status.INACTIVE])
   status: string;
+}
+
+export class AssignBranchUserDto {
+  @IsMongoId()
+  user: string;
+
+  @IsEnum(EmployeeType)
+  employeeType: string;
 }

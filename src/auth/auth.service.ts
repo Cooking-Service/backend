@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
+import { BranchesUsersService } from 'src/branches-users/branches-users.service';
 import { UserStatus } from 'src/users/schemas/user.schema';
 import { UsersService } from '../users/users.service';
 
@@ -9,6 +10,7 @@ export class AuthService {
   constructor(
     private usersService: UsersService,
     private jwtService: JwtService,
+    private branchesUsersService: BranchesUsersService,
   ) {}
 
   // if user exist, user is sended to validate() on local.startegy
@@ -37,5 +39,14 @@ export class AuthService {
     const user = this.jwtService.verify(token);
     const roles = await this.usersService.getUserRoles(user.sub);
     return roles;
+  }
+
+  async getEmployeeType(token: string): Promise<string> {
+    const user = this.jwtService.verify(token);
+    const employeeType = await this.branchesUsersService.getEmployeeType(
+      user.sub,
+    );
+
+    return employeeType;
   }
 }

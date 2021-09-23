@@ -32,6 +32,10 @@ export class BranchesService {
     private companiesService: CompaniesService,
   ) {}
 
+  async findBranch(id: string): Promise<Branch> {
+    return await this.branchModel.findById(id);
+  }
+
   async getBranchList(
     filters: BranchFiltersDto,
   ): Promise<ResponseDto<PaginationDto<Branch>>> {

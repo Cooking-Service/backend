@@ -5,17 +5,18 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
+import { EmployeesGuard } from './auth/employees.guard';
 import { JwtAuthGuard } from './auth/jwt-auth.guard';
 import { RolesGuard } from './auth/roles.guard';
 import { BranchesUsersModule } from './branches-users/branches-users.module';
 import { BranchesModule } from './branches/branches.module';
 import { CompaniesModule } from './companies/companies.module';
+import { FilesModule } from './files/files.module';
 import { OrdersModule } from './orders/orders.module';
 import { ProductsModule } from './products/products.module';
 import { ReportsModule } from './reports/reports.module';
 import { TablesModule } from './tables/tables.module';
 import { UsersModule } from './users/users.module';
-import { FilesModule } from './files/files.module';
 
 @Module({
   imports: [
@@ -47,6 +48,10 @@ import { FilesModule } from './files/files.module';
     {
       provide: APP_GUARD,
       useClass: RolesGuard,
+    },
+    {
+      provide: APP_GUARD,
+      useClass: EmployeesGuard,
     },
   ],
 })

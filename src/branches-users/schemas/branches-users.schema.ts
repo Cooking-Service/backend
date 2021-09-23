@@ -3,11 +3,19 @@ import * as mongoose from 'mongoose';
 import { Document } from 'mongoose';
 import { Branch } from 'src/branches/schemas/branch.schema';
 import { User } from 'src/users/schemas/user.schema';
-import { EmployeeType } from './employee-type.schema';
+
+export enum EmployeeType {
+  MANAGER = 'MANAGER',
+  CASHER = 'CASHER',
+  WAITER = 'WAITER',
+  COOK = 'COOK',
+}
 
 export type BranchesUsersDocument = BranchesUsers & Document;
 
-@Schema()
+@Schema({
+  versionKey: false,
+})
 export class BranchesUsers {
   @Prop({
     type: mongoose.Schema.Types.ObjectId,
@@ -22,10 +30,10 @@ export class BranchesUsers {
   user: User;
 
   @Prop({
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'EmployeeType',
+    type: String,
+    enum: EmployeeType,
   })
-  employeeType: EmployeeType;
+  employeeType: string;
 }
 
 export const BranchesUsersSchema = SchemaFactory.createForClass(BranchesUsers);

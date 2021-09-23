@@ -1,30 +1,25 @@
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
+import { BranchesModule } from 'src/branches/branches.module';
+import { UsersModule } from 'src/users/users.module';
 import { BranchesUsersService } from './branches-users.service';
-import { EmployeeTypeService } from './employee-type.service';
 import {
   BranchesUsers,
-  BranchesUsersSchema
+  BranchesUsersSchema,
 } from './schemas/branches-users.schema';
-import {
-  EmployeeType,
-  EmployeeTypeSchema
-} from './schemas/employee-type.schema';
 
 @Module({
   imports: [
+    UsersModule,
+    forwardRef(() => BranchesModule),
     MongooseModule.forFeature([
       {
         name: BranchesUsers.name,
         schema: BranchesUsersSchema,
       },
-      {
-        name: EmployeeType.name,
-        schema: EmployeeTypeSchema,
-      },
     ]),
   ],
-  providers: [BranchesUsersService, EmployeeTypeService],
+  providers: [BranchesUsersService],
   exports: [BranchesUsersService],
 })
 export class BranchesUsersModule {}
