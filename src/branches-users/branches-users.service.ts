@@ -4,6 +4,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectConnection, InjectModel } from '@nestjs/mongoose';
+import { Exception } from 'handlebars';
 import * as mongoose from 'mongoose';
 import { Model } from 'mongoose';
 import { BranchesService } from 'src/branches/branches.service';
@@ -18,7 +19,10 @@ import {
 import { RegisterUserDto } from 'src/users/dto/users.dto';
 import { User, UserRoles, UserStatus } from 'src/users/schemas/user.schema';
 import { UsersService } from 'src/users/users.service';
-import { RegisterEmployeeDto } from './dto/branches-users.dto';
+import {
+  ModifyEmployeeDto,
+  RegisterEmployeeDto,
+} from './dto/branches-users.dto';
 import {
   BranchesUsers,
   BranchesUsersDocument,
@@ -250,5 +254,73 @@ export class BranchesUsersService {
         records: employees,
       },
     };
+  }
+
+  async modifyEmployee(
+    userId: string,
+    branchId: string,
+    modifyEmployeeDto: ModifyEmployeeDto,
+    updatedBy: User,
+  ): Promise<ResponseDto<any>> {
+    const session = await this.connection.startSession();
+    session.startTransaction();
+    try {
+      const { employeeType } = modifyEmployeeDto;
+
+      delete modifyEmployeeDto.roles;
+      delete modifyEmployeeDto.company;
+      delete modifyEmployeeDto.employeeType;
+
+      const branch = await this.branchesService.findBranch(branchId);
+
+      if (!branch) {
+        throw new NotFoundException('Branch Does Not Exist');
+      }
+
+      const user = await this.usersService.getUserById(userId);
+
+      if (!user.success) {
+        throw new NotFoundException('User Does Not Exist');
+      }
+
+      const branchUser = await this.branchesUsersModel.findOne({
+        branch,
+        user: user.response,
+      });
+
+      if (!branchUser) {
+        return {
+          success: false,
+          message: 'The user is not an employee of this branch.',
+        };
+      }
+
+      const updateUser = await this.usersService.modify(
+        userId,
+        modifyEmployeeDto,
+        updatedBy,
+      );
+
+      if (!updateUser.success) {
+        await session.abortTransaction();
+        return updateUser;
+      }
+
+      employeeType ? (branchUser.employeeType = employeeType) : null;
+
+      await branchUser.save();
+
+      await session.commitTransaction();
+
+      return {
+        success: true,
+        message: 'Employee Successfully Modified.',
+      };
+    } catch (error) {
+      await session.abortTransaction();
+      throw error;
+    } finally {
+      session.endSession();
+    }
   }
 }

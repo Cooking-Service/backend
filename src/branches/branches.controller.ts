@@ -13,7 +13,10 @@ import { Employees } from 'src/auth/employees.decorator';
 import { Roles } from 'src/auth/roles.decorator';
 import { CurrentUser } from 'src/auth/user.guard';
 import { BranchesUsersService } from 'src/branches-users/branches-users.service';
-import { RegisterEmployeeDto } from 'src/branches-users/dto/branches-users.dto';
+import {
+  ModifyEmployeeDto,
+  RegisterEmployeeDto,
+} from 'src/branches-users/dto/branches-users.dto';
 import { EmployeeType } from 'src/branches-users/schemas/branches-users.schema';
 import { FilterDto } from 'src/common/dto/base-filter.dto';
 import { PaginationDto } from 'src/common/dto/pagination.dto';
@@ -147,5 +150,27 @@ export class BranchesController {
     @CurrentUser() currentUser: User,
   ): Promise<ResponseDto<Branch>> {
     return await this.service.modify(id, modifyBranchDto, currentUser);
+  }
+
+  @Put(':branchId/users/:userId')
+  @UsePipes(
+    new ValidationPipe({
+      skipMissingProperties: true,
+    }),
+  )
+  @Roles(UserRoles.SUPER_ADMIN, UserRoles.ADMIN, UserRoles.EMPLOYEE)
+  @Employees(EmployeeType.MANAGER)
+  async modifyEmployee(
+    @Param('branchId') branchId: string,
+    @Param('userId') userId: string,
+    @Body() modifyEmployeeDto: ModifyEmployeeDto,
+    @CurrentUser() currentUser: User,
+  ) {
+    return await this.branchesUsersService.modifyEmployee(
+      userId,
+      branchId,
+      modifyEmployeeDto,
+      currentUser,
+    );
   }
 }
