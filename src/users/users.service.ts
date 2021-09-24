@@ -180,11 +180,14 @@ export class UsersService {
   async create(
     registerUserDto: RegisterUserDto,
     createdBy: User,
+    clientSession?: mongoose.ClientSession,
   ): Promise<ResponseDto<User>> {
     // session will help us to manage transaccions
-    const session = await this.connection.startSession();
+    const session = clientSession
+      ? clientSession
+      : await this.connection.startSession();
 
-    session.startTransaction();
+    !clientSession ? session.startTransaction() : null;
 
     try {
       // verify if email is already registered on DB.
@@ -269,7 +272,7 @@ export class UsersService {
       }
 
       // confirm all trnasactions of mongoose.
-      await session.commitTransaction();
+      !clientSession ? await session.commitTransaction() : null;
 
       return {
         success: true,
@@ -280,7 +283,7 @@ export class UsersService {
       await session.abortTransaction();
       throw new InternalServerErrorException();
     } finally {
-      session.endSession();
+      !clientSession ? session.endSession() : null;
     }
   }
 
@@ -288,11 +291,14 @@ export class UsersService {
     id: string,
     modifyUserDto: ModifyUserDto,
     updatedBy: User,
+    clientSession?: mongoose.ClientSession,
   ): Promise<ResponseDto<User>> {
     // session will help us to manage transaccions
-    const session = await this.connection.startSession();
+    const session = clientSession
+      ? clientSession
+      : await this.connection.startSession();
 
-    session.startTransaction();
+    !clientSession ? session.startTransaction() : null;
 
     try {
       const {
@@ -380,7 +386,7 @@ export class UsersService {
         }
       }
 
-      await session.commitTransaction();
+      !clientSession ? await session.commitTransaction() : null;
 
       const { response: userRes } = await this.getUserById(id);
 
@@ -400,7 +406,7 @@ export class UsersService {
 
       throw new InternalServerErrorException();
     } finally {
-      session.endSession();
+      !clientSession ? session.endSession() : null;
     }
   }
 

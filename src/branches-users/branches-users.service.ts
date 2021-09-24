@@ -4,7 +4,6 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectConnection, InjectModel } from '@nestjs/mongoose';
-import { Exception } from 'handlebars';
 import * as mongoose from 'mongoose';
 import { Model } from 'mongoose';
 import { BranchesService } from 'src/branches/branches.service';
@@ -299,6 +298,7 @@ export class BranchesUsersService {
         userId,
         modifyEmployeeDto,
         updatedBy,
+        session,
       );
 
       if (!updateUser.success) {
