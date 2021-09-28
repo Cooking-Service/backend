@@ -48,6 +48,11 @@ export class BranchesUsersService {
     return branchUser.employeeType;
   }
 
+  async getBranchesUser(userId: any): Promise<BranchesUsers[]> {
+    const branchesUser = await this.branchesUsersModel.find({ user: userId });
+    return branchesUser;
+  }
+
   async assignBranchUser(
     assignBranchUserDto: AssignBranchUserDto,
     branch: string,

@@ -1,4 +1,4 @@
-import { Module, forwardRef } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { BranchesModule } from 'src/branches/branches.module';
 import { UsersModule } from 'src/users/users.module';
@@ -7,6 +7,10 @@ import {
   BranchesUsers,
   BranchesUsersSchema,
 } from './schemas/branches-users.schema';
+import {
+  EmployeePermission,
+  EmployeePermissionSchema,
+} from './schemas/employee-permission.schema';
 
 @Module({
   imports: [
@@ -16,6 +20,10 @@ import {
       {
         name: BranchesUsers.name,
         schema: BranchesUsersSchema,
+      },
+      {
+        name: EmployeePermission.name,
+        schema: EmployeePermissionSchema,
       },
     ]),
   ],

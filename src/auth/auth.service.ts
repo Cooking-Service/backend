@@ -49,4 +49,20 @@ export class AuthService {
 
     return employeeType;
   }
+
+  async verifyToken(token: string): Promise<{ success: boolean; payload?: {} }> {
+    return await this.jwtService
+      .verify(token)
+      .then((payload) => {
+        return {
+          success: true,
+          payload,
+        };
+      })
+      .catch(() => {
+        return {
+          success: false,
+        };
+      });
+  }
 }
