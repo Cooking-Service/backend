@@ -15,15 +15,15 @@ import { Roles } from 'src/auth/roles.decorator';
 import { SkipAuth } from 'src/auth/skip-auth.decorator';
 import { CurrentUser } from 'src/auth/user.guard';
 import { ResponseDto } from 'src/common/dto/response.dto';
+import { GroupsValidation, UserRoles } from 'src/common/types/enums';
 import {
   ActivateAccountDto,
-  GroupsValidation,
   ModifyPasswordDto,
   ModifyUserDto,
   RegisterUserDto,
   UserFiltersDto,
 } from './dto/users.dto';
-import { User, UserRoles } from './schemas/user.schema';
+import { User } from './schemas/user.schema';
 import { UsersService } from './users.service';
 
 @Controller('users')

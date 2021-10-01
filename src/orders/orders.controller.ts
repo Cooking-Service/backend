@@ -7,7 +7,8 @@ import {
 } from '@nestjs/common';
 import { Roles } from 'src/auth/roles.decorator';
 import { CurrentUser } from 'src/auth/user.guard';
-import { User, UserRoles } from 'src/users/schemas/user.schema';
+import { UserRoles } from 'src/common/types/enums';
+import { User } from 'src/users/schemas/user.schema';
 import { CreateOrderDto } from './dto/orders.dto';
 import { OrdersService } from './orders.service';
 

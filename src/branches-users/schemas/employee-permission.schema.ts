@@ -1,8 +1,7 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import * as mongoose from 'mongoose';
 import { Branch } from 'src/branches/schemas/branch.schema';
-import { OrdersStatuses } from 'src/orders/schemas/order.schema';
-import { EmployeeType } from './branches-users.schema';
+import { EmployeeType, OrdersStatuses } from 'src/common/types/enums';
 
 export type EmployeePermissionDocument = EmployeePermission & mongoose.Document;
 

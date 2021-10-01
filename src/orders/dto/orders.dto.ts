@@ -6,8 +6,6 @@ import {
   IsString,
   ValidateNested,
 } from 'class-validator';
-import { EmployeePermission } from 'src/branches-users/schemas/employee-permission.schema';
-import { User } from 'src/users/schemas/user.schema';
 
 export class OrderItemDto {
   @IsMongoId()
@@ -35,5 +33,3 @@ export class CreateOrderDto {
   @IsMongoId()
   branch: string;
 }
-
-export type Employee = User & EmployeePermission;

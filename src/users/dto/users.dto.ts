@@ -7,16 +7,11 @@ import {
   MinLength,
 } from 'class-validator';
 import * as mongoose from 'mongoose';
-import { UserRoles, UserStatus } from '../schemas/user.schema';
-
-export enum GroupsValidation {
-  PROFILE = 'PROFILE',
-  SUPER_ADMIN = 'SUPER_ADMIN',
-  ADMIN = 'ADMIN',
-  MANAGER = 'MANAGER',
-  EMPLOYEE = 'EMPLOYEE',
-  FROM_BRANCH = 'FROM_BRANCH',
-}
+import {
+  GroupsValidation,
+  UserRoles,
+  UserStatus,
+} from 'src/common/types/enums';
 
 export class RegisterUserDto {
   @IsString()

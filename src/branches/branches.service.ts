@@ -7,16 +7,16 @@ import {
 import { InjectConnection, InjectModel } from '@nestjs/mongoose';
 import * as mongoose from 'mongoose';
 import { Model } from 'mongoose';
-import { CurrentUser } from 'src/auth/user.guard';
 import { PaginationDto } from 'src/common/dto/pagination.dto';
 import { ResponseDto } from 'src/common/dto/response.dto';
+import { UserRoles, UserStatus } from 'src/common/types/enums';
 import {
   BRANCH_ITEM_LIST_SELECT,
   COMPANY_SUBDOC_SELECT,
-} from 'src/common/dto/select.structures';
+} from 'src/common/types/select.structures';
 import { countRecords } from 'src/common/utils/utils';
 import { CompaniesService } from 'src/companies/companies.service';
-import { User, UserRoles, UserStatus } from 'src/users/schemas/user.schema';
+import { User } from 'src/users/schemas/user.schema';
 import {
   BranchFiltersDto,
   CreateBranchDto,

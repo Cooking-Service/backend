@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { BranchesUsersService } from 'src/branches-users/branches-users.service';
-import { UserStatus } from 'src/users/schemas/user.schema';
+import { UserStatus } from 'src/common/types/enums';
 import { UsersService } from '../users/users.service';
 
 @Injectable()
@@ -50,7 +50,9 @@ export class AuthService {
     return employeeType;
   }
 
-  async verifyToken(token: string): Promise<{ success: boolean; payload?: {} }> {
+  async verifyToken(
+    token: string,
+  ): Promise<{ success: boolean; payload?: {} }> {
     return await this.jwtService
       .verify(token)
       .then((payload) => {

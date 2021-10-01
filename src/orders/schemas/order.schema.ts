@@ -1,19 +1,12 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import * as mongoose from 'mongoose';
 import { Branch } from 'src/branches/schemas/branch.schema';
+import { OrdersStatuses } from 'src/common/types/enums';
 import { Product } from 'src/products/schemas/product.schema';
 import { Table } from 'src/tables/schemas/table.schema';
 import { User } from 'src/users/schemas/user.schema';
 
 export type OrderDocument = Order & mongoose.Document;
-
-export enum OrdersStatuses {
-  OPEN = 'OPEN',
-  COOKING = 'COOKING',
-  PENDING = 'PENDING',
-  CLOSED = 'CLOSED',
-  CANCELLED = ' CANCELLED',
-}
 
 export type OrderItem = {
   product: Product;

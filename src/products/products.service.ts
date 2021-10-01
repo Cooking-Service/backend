@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Branch } from 'src/branches/schemas/branch.schema';
-import { Status } from 'src/common/schemas/base.schema';
+import { Status } from 'src/common/types/enums';
 import {
   BranchProduct,
   BranchProductDocument,

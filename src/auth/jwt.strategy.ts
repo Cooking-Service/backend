@@ -1,10 +1,9 @@
-import {
-  ForbiddenException, Injectable
-} from '@nestjs/common';
+import { ForbiddenException, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
-import { User, UserStatus } from 'src/users/schemas/user.schema';
+import { UserStatus } from 'src/common/types/enums';
+import { User } from 'src/users/schemas/user.schema';
 import { UsersService } from 'src/users/users.service';
 
 @Injectable()

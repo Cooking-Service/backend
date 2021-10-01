@@ -7,7 +7,7 @@ import {
 import { FileInterceptor } from '@nestjs/platform-express';
 import { InjectS3, S3 } from 'nestjs-s3';
 import { Roles } from 'src/auth/roles.decorator';
-import { UserRoles } from 'src/users/schemas/user.schema';
+import { UserRoles } from 'src/common/types/enums';
 import { FilesService } from './files.service';
 import { CollectionTypes, ResourceTypes } from './schemas/file.schema';
 

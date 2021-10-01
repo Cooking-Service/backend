@@ -1,6 +1,6 @@
 import { IsEmail, IsEnum, IsString } from 'class-validator';
+import { EmployeeType } from 'src/common/types/enums';
 import { ModifyUserDto } from 'src/users/dto/users.dto';
-import { EmployeeType } from '../schemas/branches-users.schema';
 
 export class RegisterEmployeeDto {
   @IsString()

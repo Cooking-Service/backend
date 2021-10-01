@@ -10,13 +10,14 @@ import * as mongoose from 'mongoose';
 import { Model } from 'mongoose';
 import { PaginationDto } from 'src/common/dto/pagination.dto';
 import { ResponseDto } from 'src/common/dto/response.dto';
+import { EmailTemplate, sendEmail } from 'src/common/mailer/node.mailer';
+import { HashType, UserRoles, UserStatus } from 'src/common/types/enums';
 import {
   COMPANY_SUBDOC_SELECT,
   USER_ITEM_LIST_SELECT,
   USER_PROFILE_SELECT,
   USER_SUBDOC_SELECT,
-} from 'src/common/dto/select.structures';
-import { EmailTemplate, sendEmail } from 'src/common/mailer/node.mailer';
+} from 'src/common/types/select.structures';
 import { countRecords } from 'src/common/utils/utils';
 import { CompaniesService } from 'src/companies/companies.service';
 import {
@@ -26,13 +27,7 @@ import {
   RegisterUserDto,
   UserFiltersDto,
 } from './dto/users.dto';
-import { HashType } from './schemas/user-hash.schema';
-import {
-  User,
-  UserDocument,
-  UserRoles,
-  UserStatus,
-} from './schemas/user.schema';
+import { User, UserDocument } from './schemas/user.schema';
 import { UsersHashesService } from './users-hashes.service';
 import { generateUsername } from './utils/user.utils';
 

@@ -8,7 +8,8 @@ import {
 import { Roles } from 'src/auth/roles.decorator';
 import { CurrentUser } from 'src/auth/user.guard';
 import { ResponseDto } from 'src/common/dto/response.dto';
-import { User, UserRoles } from 'src/users/schemas/user.schema';
+import { UserRoles } from 'src/common/types/enums';
+import { User } from 'src/users/schemas/user.schema';
 import { CompaniesService } from './companies.service';
 import { CreateCompanyDto } from './dto/companies.dto';
 import { Company } from './schemas/company.schema';

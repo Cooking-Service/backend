@@ -1,23 +1,10 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import * as mongoose from 'mongoose';
 import { Document } from 'mongoose';
+import { UserRoles, UserStatus } from 'src/common/types/enums';
 import { Company } from 'src/companies/schemas/company.schema';
 
 export type UserDocument = User & Document;
-
-export enum UserRoles {
-  SUPER_ADMIN = 'SUPER_ADMIN',
-  ADMIN = 'ADMIN',
-  OBSERVER = 'OBSERVER',
-  EMPLOYEE = 'EMPLOYEE',
-}
-
-export enum UserStatus {
-  PENDINDG = 'PENDING',
-  ACTIVE = 'ACTIVE',
-  INACTIVE = 'INACTIVE',
-  DELETED = 'DELETED',
-}
 
 @Schema({ versionKey: false })
 export class User {

@@ -9,15 +9,11 @@ import { Model } from 'mongoose';
 import { BranchesUsersService } from 'src/branches-users/branches-users.service';
 import { BranchesService } from 'src/branches/branches.service';
 import { ResponseDto } from 'src/common/dto/response.dto';
+import { UserRoles, OrdersStatuses } from 'src/common/types/enums';
 import { ProductsService } from 'src/products/products.service';
-import { User, UserRoles } from 'src/users/schemas/user.schema';
+import { User } from 'src/users/schemas/user.schema';
 import { CreateOrderDto } from './dto/orders.dto';
-import {
-  Order,
-  OrderDocument,
-  OrderItem,
-  OrdersStatuses,
-} from './schemas/order.schema';
+import { Order, OrderDocument, OrderItem } from './schemas/order.schema';
 
 @Injectable()
 export class OrdersService {

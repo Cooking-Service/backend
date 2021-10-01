@@ -11,12 +11,13 @@ import { AssignBranchUserDto } from 'src/branches/dto/branches.dto';
 import { FilterDto } from 'src/common/dto/base-filter.dto';
 import { PaginationDto } from 'src/common/dto/pagination.dto';
 import { ResponseDto } from 'src/common/dto/response.dto';
+import { EmployeeType, UserRoles, UserStatus } from 'src/common/types/enums';
 import {
   CONTACT_LIST_SELECT,
   EMPLOYEE_LIST_SELECT,
-} from 'src/common/dto/select.structures';
+} from 'src/common/types/select.structures';
 import { RegisterUserDto } from 'src/users/dto/users.dto';
-import { User, UserRoles, UserStatus } from 'src/users/schemas/user.schema';
+import { User } from 'src/users/schemas/user.schema';
 import { UsersService } from 'src/users/users.service';
 import {
   ModifyEmployeeDto,
@@ -25,7 +26,6 @@ import {
 import {
   BranchesUsers,
   BranchesUsersDocument,
-  EmployeeType,
 } from './schemas/branches-users.schema';
 import {
   EmployeePermission,

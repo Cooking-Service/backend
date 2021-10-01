@@ -17,12 +17,11 @@ import {
   ModifyEmployeeDto,
   RegisterEmployeeDto,
 } from 'src/branches-users/dto/branches-users.dto';
-import { EmployeeType } from 'src/branches-users/schemas/branches-users.schema';
 import { FilterDto } from 'src/common/dto/base-filter.dto';
 import { PaginationDto } from 'src/common/dto/pagination.dto';
 import { ResponseDto } from 'src/common/dto/response.dto';
-import { Status } from 'src/common/schemas/base.schema';
-import { User, UserRoles } from 'src/users/schemas/user.schema';
+import { EmployeeType, Status, UserRoles } from 'src/common/types/enums';
+import { User } from 'src/users/schemas/user.schema';
 import { BranchesService } from './branches.service';
 import {
   AssignBranchUserDto,

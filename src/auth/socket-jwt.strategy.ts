@@ -2,8 +2,9 @@ import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PassportStrategy } from '@nestjs/passport';
 import { WsException } from '@nestjs/websockets';
-import { Strategy, ExtractJwt } from 'passport-jwt';
-import { User, UserStatus } from 'src/users/schemas/user.schema';
+import { ExtractJwt, Strategy } from 'passport-jwt';
+import { UserStatus } from 'src/common/types/enums';
+import { User } from 'src/users/schemas/user.schema';
 import { UsersService } from 'src/users/users.service';
 
 @Injectable()
