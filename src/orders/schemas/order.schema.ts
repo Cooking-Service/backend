@@ -1,9 +1,9 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import * as mongoose from 'mongoose';
 import { Branch } from 'src/branches/schemas/branch.schema';
+import { Product } from 'src/products/schemas/product.schema';
 import { Table } from 'src/tables/schemas/table.schema';
 import { User } from 'src/users/schemas/user.schema';
-import { OrderItem } from './order-item.schema';
 
 export type OrderDocument = Order & mongoose.Document;
 
@@ -15,12 +15,19 @@ export enum OrdersStatuses {
   CANCELLED = ' CANCELLED',
 }
 
-@Schema()
+export type OrderItem = {
+  product: Product;
+  comments?: string;
+};
+
+@Schema({
+  versionKey: false,
+})
 export class Order {
-  @Prop()
+  @Prop({ default: null })
   customer: string;
 
-  @Prop()
+  @Prop({ default: null })
   total: number;
 
   @Prop({
@@ -33,50 +40,51 @@ export class Order {
   @Prop({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Table',
+    default: null,
   })
   table: Table;
 
   @Prop({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Branch',
+    required: true,
   })
   branch: Branch;
 
   @Prop({
-    type: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'OrderItem',
-      },
-    ],
+    type: [mongoose.Schema.Types.Mixed],
+    default: [],
   })
   items: OrderItem[];
 
   @Prop({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
+    default: null,
   })
   createdBy: User;
 
-  @Prop()
+  @Prop({ default: null })
   createdOn: Date;
 
   @Prop({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
+    default: null,
   })
   cookedBy: User;
 
-  @Prop()
+  @Prop({ default: null })
   cookedOn: Date;
 
   @Prop({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
+    default: null,
   })
   chargedBy: User;
 
-  @Prop()
+  @Prop({ default: null })
   chargedOn: Date;
 }
 

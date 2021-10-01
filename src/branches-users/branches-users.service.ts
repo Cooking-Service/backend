@@ -27,12 +27,18 @@ import {
   BranchesUsersDocument,
   EmployeeType,
 } from './schemas/branches-users.schema';
+import {
+  EmployeePermission,
+  EmployeePermissionDocument,
+} from './schemas/employee-permission.schema';
 
 @Injectable()
 export class BranchesUsersService {
   constructor(
     @InjectModel(BranchesUsers.name)
     private branchesUsersModel: Model<BranchesUsersDocument>,
+    @InjectModel(EmployeePermission.name)
+    private employeePermissionModel: Model<EmployeePermissionDocument>,
     @InjectConnection() private connection: mongoose.Connection,
     private usersService: UsersService,
     private branchesService: BranchesService,
@@ -327,5 +333,21 @@ export class BranchesUsersService {
     } finally {
       session.endSession();
     }
+  }
+
+  async getEmployeePermissions(
+    employeeId: any,
+    branchId: any,
+  ): Promise<EmployeePermission> {
+    const branchUser = await this.branchesUsersModel.findOne({
+      branch: branchId,
+      user: employeeId,
+    });
+
+    const permissions = await this.employeePermissionModel.findOne({
+      employeeType: branchUser.employeeType,
+    });
+
+    return permissions;
   }
 }

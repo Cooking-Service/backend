@@ -20,7 +20,7 @@ export class EmployeePermission {
     type: String,
     enum: EmployeeType,
   })
-  employeeType: EmployeeType;
+  employeeType: string;
 
   @Prop({
     type: [String],

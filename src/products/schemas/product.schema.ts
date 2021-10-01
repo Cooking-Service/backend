@@ -24,6 +24,7 @@ export class Product extends Base {
         ref: 'Complement',
       },
     ],
+    select: false,
   })
   complements: Complement[];
 

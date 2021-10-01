@@ -14,6 +14,8 @@ export enum GroupsValidation {
   SUPER_ADMIN = 'SUPER_ADMIN',
   ADMIN = 'ADMIN',
   MANAGER = 'MANAGER',
+  EMPLOYEE = 'EMPLOYEE',
+  FROM_BRANCH = 'FROM_BRANCH',
 }
 
 export class RegisterUserDto {
