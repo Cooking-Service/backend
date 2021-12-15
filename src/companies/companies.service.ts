@@ -1,10 +1,17 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectConnection, InjectModel } from '@nestjs/mongoose';
 import * as mongoose from 'mongoose';
 import { Model } from 'mongoose';
+import { PaginationDto } from 'src/common/dto/pagination.dto';
 import { ResponseDto } from 'src/common/dto/response.dto';
+import { Status } from 'src/common/types/enums';
+import {
+  COMPANY_LIST_SELECT,
+  USER_SUBDOC_SELECT,
+} from 'src/common/types/select.structures';
+import { countRecords } from 'src/common/utils/utils';
 import { User } from 'src/users/schemas/user.schema';
-import { CreateCompanyDto } from './dto/companies.dto';
+import { ComapnyFiltersDto, CreateCompanyDto } from './dto/companies.dto';
 import { Company, CompanyDocument } from './schemas/company.schema';
 
 @Injectable()
@@ -24,6 +31,83 @@ export class CompaniesService {
       return {
         success: false,
       };
+    }
+
+    return {
+      success: true,
+      response: company,
+    };
+  }
+
+  async getCompanyList(
+    filters: ComapnyFiltersDto,
+  ): Promise<ResponseDto<PaginationDto<Company>>> {
+    let {
+      limit = 10,
+      skip = 1,
+      search = '',
+      status = null,
+      sortBy = '-createdOn',
+    } = filters;
+
+    if (typeof limit === 'string') {
+      limit = parseInt(limit);
+    }
+
+    if (typeof skip === 'string') {
+      skip = parseInt(skip);
+    }
+
+    const matchQuery = {
+      $or: [
+        { name: { $regex: search, $options: 'i' } },
+        { code: { $regex: search, $options: 'i' } },
+      ],
+      status: status ? { $eq: status } : { $ne: Status.DELETED },
+    };
+
+    const companies = await this.companyModel
+      .aggregate()
+      .match(matchQuery)
+      .project(COMPANY_LIST_SELECT)
+      .sort(sortBy)
+      .skip(skip * limit - limit)
+      .limit(limit);
+
+    const totalRecords = await countRecords(this.companyModel, matchQuery, {});
+
+    const totalPages = Math.ceil(totalRecords / limit);
+
+    return {
+      success: true,
+      response: {
+        skip,
+        limit,
+        totalPages,
+        totalRecords,
+        records: companies,
+      },
+    };
+  }
+
+  async getCompanyById(id: string): Promise<ResponseDto<any>> {
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      throw new NotFoundException('Company Not Found');
+    }
+
+    const company = await this.companyModel.findById(id).populate([
+      {
+        path: 'createdBy',
+        select: USER_SUBDOC_SELECT,
+      },
+      {
+        path: 'updatedBy',
+        select: USER_SUBDOC_SELECT,
+      },
+    ]);
+
+    if (!company) {
+      throw new NotFoundException('User Not Found');
     }
 
     return {

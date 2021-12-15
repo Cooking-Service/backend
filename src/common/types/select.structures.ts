@@ -27,6 +27,14 @@ export const COMPANY_SUBDOC_SELECT = {
   logo: 1,
 };
 
+export const COMPANY_LIST_SELECT = {
+  name: 1,
+  code: 1,
+  createdOn: 1,
+  status: 1,
+  logo: 1,
+};
+
 export const BRANCH_ITEM_LIST_SELECT = {
   name: 1,
   status: 1,
