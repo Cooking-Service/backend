@@ -25,7 +25,7 @@ import { UsersModule } from './users/users.module';
     }),
     MongooseModule.forRoot(
       `mongodb+srv://${process.env.MONGO_USER}:${process.env.MONGO_PASS}@${process.env.MONGO_HOST}/${process.env.MONGO_NAME}?retryWrites=true&w=majority`,
-      { useCreateIndex: true },
+      { useCreateIndex: true, useFindAndModify: false },
     ),
     UsersModule,
     AuthModule,

@@ -253,4 +253,37 @@ export class CompaniesService {
       !clientSessiion ? session.endSession() : null;
     }
   }
+
+  async companyDeletion(
+    id: string,
+    deletedBy: User,
+  ): Promise<ResponseDto<any>> {
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      throw new NotFoundException();
+    }
+
+    const company = await this.companyModel.findByIdAndUpdate(id, {
+      $unset: {
+        code: 1,
+        createdBy: 1,
+        createdOn: 1,
+        updatedBy: 1,
+        updatedOn: 1,
+      },
+      $set: {
+        status: Status.DELETED,
+        name: `Deleted By ${deletedBy.username} (${
+          deletedBy['id']
+        }) on ${new Date().toISOString()}`,
+      },
+    });
+
+    if (!company) {
+      throw new NotFoundException();
+    }
+    return {
+      success: true,
+      message: 'Company Successfully Deleted',
+    };
+  }
 }

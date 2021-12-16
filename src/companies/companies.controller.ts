@@ -54,6 +54,15 @@ export class CompaniesController {
     return await this.service.create(createCompanyDto, currentUser);
   }
 
+  @Put('deletion/:id')
+  @Roles(UserRoles.SUPER_ADMIN)
+  async companyDeletion(
+    @Param('id') id: string,
+    @CurrentUser() currentUser: User,
+  ): Promise<ResponseDto<any>> {
+    return await this.service.companyDeletion(id, currentUser);
+  }
+
   @Put(':id')
   @UsePipes(
     new ValidationPipe({
