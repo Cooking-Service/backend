@@ -4,6 +4,7 @@ import {
   Get,
   Param,
   Post,
+  Put,
   Query,
   UsePipes,
   ValidationPipe,
@@ -14,7 +15,11 @@ import { ResponseDto } from 'src/common/dto/response.dto';
 import { UserRoles } from 'src/common/types/enums';
 import { User } from 'src/users/schemas/user.schema';
 import { CompaniesService } from './companies.service';
-import { ComapnyFiltersDto, CreateCompanyDto } from './dto/companies.dto';
+import {
+  ComapnyFiltersDto,
+  CreateCompanyDto,
+  ModifyCompanyDto,
+} from './dto/companies.dto';
 import { Company } from './schemas/company.schema';
 
 @Controller('companies')
@@ -47,5 +52,20 @@ export class CompaniesController {
     @CurrentUser() currentUser: User,
   ): Promise<ResponseDto<Company>> {
     return await this.service.create(createCompanyDto, currentUser);
+  }
+
+  @Put(':id')
+  @UsePipes(
+    new ValidationPipe({
+      skipMissingProperties: true,
+    }),
+  )
+  @Roles(UserRoles.SUPER_ADMIN)
+  async modifyCompanyById(
+    @Param('id') id: string,
+    @Body() modifyCompanyDto: ModifyCompanyDto,
+    @CurrentUser() currentUser: User,
+  ): Promise<ResponseDto<Company>> {
+    return await this.service.modify(id, modifyCompanyDto, currentUser);
   }
 }

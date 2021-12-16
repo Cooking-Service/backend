@@ -1,5 +1,6 @@
-import { IsString, Length } from 'class-validator';
+import { IsEnum, IsString, Length } from 'class-validator';
 import { FilterDto } from 'src/common/dto/base-filter.dto';
+import { Status } from 'src/common/types/enums';
 
 export class CreateCompanyDto {
   @IsString()
@@ -11,3 +12,11 @@ export class CreateCompanyDto {
 }
 
 export class ComapnyFiltersDto extends FilterDto {}
+
+export class ModifyCompanyDto {
+  @IsString()
+  name: string;
+
+  @IsEnum([Status.ACTIVE, Status.INACTIVE])
+  status: string;
+}

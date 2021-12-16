@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectConnection, InjectModel } from '@nestjs/mongoose';
 import * as mongoose from 'mongoose';
 import { Model } from 'mongoose';
@@ -11,7 +15,11 @@ import {
 } from 'src/common/types/select.structures';
 import { countRecords } from 'src/common/utils/utils';
 import { User } from 'src/users/schemas/user.schema';
-import { ComapnyFiltersDto, CreateCompanyDto } from './dto/companies.dto';
+import {
+  ComapnyFiltersDto,
+  CreateCompanyDto,
+  ModifyCompanyDto,
+} from './dto/companies.dto';
 import { Company, CompanyDocument } from './schemas/company.schema';
 
 @Injectable()
@@ -90,7 +98,7 @@ export class CompaniesService {
     };
   }
 
-  async getCompanyById(id: string): Promise<ResponseDto<any>> {
+  async getCompanyById(id: string): Promise<ResponseDto<Company>> {
     if (!mongoose.Types.ObjectId.isValid(id)) {
       throw new NotFoundException('Company Not Found');
     }
@@ -174,6 +182,75 @@ export class CompaniesService {
       throw error;
     } finally {
       session.endSession();
+    }
+  }
+
+  async modify(
+    id: string,
+    modifyCompanyDto: ModifyCompanyDto,
+    updatedBy: User,
+    clientSessiion?: mongoose.ClientSession,
+  ): Promise<ResponseDto<Company>> {
+    // session will help us to manage transactions
+    const session = clientSessiion
+      ? clientSessiion
+      : await this.connection.startSession();
+
+    !clientSessiion ? session.startTransaction() : null;
+
+    try {
+      const { name, status } = modifyCompanyDto;
+
+      if (!mongoose.Types.ObjectId.isValid(id)) {
+        throw new NotFoundException('Company Not Found.');
+      }
+
+      // verify if company exist.
+      const company = await this.companyModel.findById(id).session(session);
+      if (!company) {
+        throw new NotFoundException('Company Not Found.');
+      }
+
+      if (name) {
+        const existCompany = await this.companyModel.exists({
+          name: { $regex: `^${name}$`, $options: 'i' },
+        });
+
+        if (existCompany) {
+          await session.abortTransaction();
+          return {
+            success: false,
+            message: 'A Company with this name already exists.',
+          };
+        }
+      }
+
+      name ? (company.name = name) : null;
+      status ? (company.status = status) : null;
+      company.updatedBy = updatedBy;
+      company.updatedOn = new Date();
+
+      await company.save({ session });
+
+      !clientSessiion ? await session.commitTransaction() : null;
+
+      const { response: companyRes } = await this.getCompanyById(id);
+
+      return {
+        success: true,
+        message: 'Company Successfully Updated.',
+        response: companyRes,
+      };
+    } catch (error) {
+      await session.abortTransaction();
+
+      if (error.status === 404) {
+        throw error;
+      }
+
+      throw new InternalServerErrorException();
+    } finally {
+      !clientSessiion ? session.endSession() : null;
     }
   }
 }
